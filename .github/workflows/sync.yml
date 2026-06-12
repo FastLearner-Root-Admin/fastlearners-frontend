@@ -1,0 +1,33 @@
+name: Scheduled Upstream Sync
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs every day at midnight UTC
+  workflow_dispatch: # Allows you to manually trigger the sync anytime
+
+jobs:
+  sync_latest_from_upstream:
+    runs-size: ubuntu-latest
+    name: Sync latest commits from upstream repo
+
+    steps:
+    # Step 1: Checkout your fork
+    - name: Checkout target repo
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    # Step 2: Sync from downstream to upstream
+    - name: Sync upstream changes
+      id: sync
+      uses: a crappy-dev/upstream-sync-action@v2.0
+      with:
+        upstream_sync_repo: https://github.com/travis-wayne/fastlearners-frontend
+        upstream_sync_branch: main # Change to master if needed
+        target_sync_branch: main # Your fork's default branch
+        target_branch_checkout: main
+
+    # Optional: Handle sync failures (like merge conflicts)
+    - name: Check for failure
+      if: steps.sync.outputs.has_new_commits == 'false' && steps.sync.outcome == 'failure'
+      run: echo "Sync failed. Check for merge conflicts."
