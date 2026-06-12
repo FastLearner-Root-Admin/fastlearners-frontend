@@ -7,7 +7,7 @@ on:
 
 jobs:
   sync_latest_from_upstream:
-    runs-size: ubuntu-latest
+    runs-on: ubuntu-latest
     name: Sync latest commits from upstream repo
 
     steps:
