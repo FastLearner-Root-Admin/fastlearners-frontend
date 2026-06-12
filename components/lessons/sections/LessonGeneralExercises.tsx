@@ -417,7 +417,7 @@ export const LessonGeneralExercises = React.memo(
     };
 
     return (
-      <div className="flex h-full flex-col gap-6 overflow-y-auto p-1">
+      <div className="flex h-full min-w-0 flex-col gap-6 overflow-y-auto overflow-x-hidden p-1">
         <DismissibleCard
           id="general_exercises_intro"
           title="Finishing the lesson"
@@ -441,13 +441,15 @@ export const LessonGeneralExercises = React.memo(
         />
         <Card className="border-2 shadow-lg">
           <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
                 <div className="flex size-12 items-center justify-center rounded-xl bg-purple-100 dark:bg-purple-900/30">
                   <Trophy className="size-6 text-purple-600 dark:text-purple-400" />
                 </div>
                 <div>
-                  <CardTitle className="text-2xl">Practice Exercises</CardTitle>
+                  <CardTitle className="text-xl sm:text-2xl">
+                    Practice Exercises
+                  </CardTitle>
                   <p className="mt-1 text-sm text-muted-foreground">
                     Test your understanding with these exercises
                   </p>
@@ -477,7 +479,7 @@ export const LessonGeneralExercises = React.memo(
                 value={filter}
                 onValueChange={(value: FilterType) => setFilter(value)}
               >
-                <SelectTrigger className="w-32">
+                <SelectTrigger className="w-full sm:w-32">
                   <Filter className="mr-2 size-4" />
                   <SelectValue />
                 </SelectTrigger>
@@ -492,7 +494,7 @@ export const LessonGeneralExercises = React.memo(
                 value={sort}
                 onValueChange={(value: SortType) => setSort(value)}
               >
-                <SelectTrigger className="w-32">
+                <SelectTrigger className="w-full sm:w-32">
                   <SortAsc className="mr-2 size-4" />
                   <SelectValue />
                 </SelectTrigger>
@@ -582,7 +584,7 @@ export const LessonGeneralExercises = React.memo(
             {/* Progress */}
             {stats.total > 0 && (
               <div className="space-y-4 rounded-xl border-2 bg-gradient-to-r from-purple-50/50 via-purple-50/30 to-background p-6 dark:from-purple-950/20 dark:via-purple-950/10 dark:to-background">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-3">
                     <Target className="size-5 text-purple-600 dark:text-purple-400" />
                     <span className="font-semibold text-foreground">
@@ -774,7 +776,7 @@ export const LessonGeneralExercises = React.memo(
               {mode === "focus" ? (
                 processedExercises.length > 0 ? (
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <span>
                         Exercise {currentFocusIndex + 1} of{" "}
                         {processedExercises.length}

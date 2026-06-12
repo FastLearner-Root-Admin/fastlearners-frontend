@@ -54,7 +54,7 @@ export default async function LessonPage({
 
   if (!slug || slug.length !== 2) {
     return (
-      <div className="container max-w-4xl py-6">
+      <div className="mx-auto max-w-4xl py-6">
         <Card className="border-2 border-dashed">
           <CardHeader>
             <CardTitle>Invalid Lesson URL</CardTitle>
@@ -77,7 +77,7 @@ export default async function LessonPage({
   const topic = formatSlug(topicSlug);
 
   return (
-    <div className="container space-y-6 pb-20">
+    <div className="min-w-0 space-y-6 pb-20">
       {/* Breadcrumb Navigation */}
       <Breadcrumb>
         <BreadcrumbList>

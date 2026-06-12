@@ -12,6 +12,7 @@ import {
 
 import type { Exercise } from "@/lib/types/lessons";
 import { cn } from "@/lib/utils";
+import { resolveMediaUrl } from "@/lib/utils/media";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -102,21 +103,19 @@ export function ExerciseModal({ exercise, index }: ExerciseModalProps) {
             <p className="text-sm text-muted-foreground">{exercise.problem}</p>
           )}
 
-          {exercise.image_path &&
-            (exercise.image_path.startsWith("/") ||
-              exercise.image_path.startsWith("http")) && (
-              <div className="my-2">
-                <Image
-                  src={exercise.image_path}
-                  alt={exercise.title || "Exercise illustration"}
-                  width={800}
-                  height={450}
-                  className="h-auto max-w-full rounded-lg"
-                  style={{ width: "100%", height: "auto" }}
-                  unoptimized
-                />
-              </div>
-            )}
+          {resolveMediaUrl(exercise.image_path) && (
+            <div className="my-2">
+              <Image
+                src={resolveMediaUrl(exercise.image_path) ?? ""}
+                alt={exercise.title || "Exercise illustration"}
+                width={800}
+                height={450}
+                className="h-auto w-full max-w-full rounded-lg object-contain"
+                style={{ width: "100%", height: "auto" }}
+                unoptimized
+              />
+            </div>
+          )}
           {exercise.audio_path && (
             <AudioPlayer
               src={exercise.audio_path}
@@ -140,21 +139,19 @@ export function ExerciseModal({ exercise, index }: ExerciseModalProps) {
           )}
         </DialogHeader>
 
-        {exercise.image_path &&
-          (exercise.image_path.startsWith("/") ||
-            exercise.image_path.startsWith("http")) && (
-            <div className="my-2">
-              <Image
-                src={exercise.image_path}
-                alt={exercise.title || "Exercise illustration"}
-                width={800}
-                height={450}
-                className="h-auto max-w-full rounded-lg"
-                style={{ width: "100%", height: "auto" }}
-                unoptimized
-              />
-            </div>
-          )}
+        {resolveMediaUrl(exercise.image_path) && (
+          <div className="my-2">
+            <Image
+              src={resolveMediaUrl(exercise.image_path) ?? ""}
+              alt={exercise.title || "Exercise illustration"}
+              width={800}
+              height={450}
+              className="h-auto w-full max-w-full rounded-lg object-contain"
+              style={{ width: "100%", height: "auto" }}
+              unoptimized
+            />
+          </div>
+        )}
         {exercise.audio_path && (
           <AudioPlayer
             src={exercise.audio_path}

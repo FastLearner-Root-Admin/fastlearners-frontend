@@ -37,3 +37,30 @@ export function getYouTubeEmbedUrl(
 
   return null;
 }
+
+const DEFAULT_API_ORIGIN = "https://api.fastlearnersapp.com";
+
+function getApiOrigin() {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  if (!apiUrl) return DEFAULT_API_ORIGIN;
+
+  try {
+    return new URL(apiUrl).origin;
+  } catch {
+    return DEFAULT_API_ORIGIN;
+  }
+}
+
+export function resolveMediaUrl(path?: string | null) {
+  const value = path?.trim();
+  if (!value) return null;
+
+  if (value.startsWith("data:") || value.startsWith("blob:")) return value;
+  if (value.startsWith("http://") || value.startsWith("https://")) return value;
+  if (value.startsWith("//")) return `https:${value}`;
+  if (value.startsWith("/")) return value;
+
+  const normalizedPath = value.replace(/^\.\//, "");
+  return `${getApiOrigin()}/${normalizedPath.replace(/^\/+/, "")}`;
+}

@@ -21,7 +21,7 @@ export function DashboardBlogLayout({
 }: DashboardBlogLayoutProps) {
   return (
     <>
-      <div className="container py-6 md:pb-8 md:pt-10">
+      <div className="container mx-auto px-4 py-6 sm:px-6 md:pb-8 md:pt-10 lg:px-8">
         <div className="max-w-screen-sm">
           <h1 className="font-heading text-3xl md:text-4xl">{title}</h1>
           {description && (
@@ -32,7 +32,13 @@ export function DashboardBlogLayout({
         </div>
       </div>
 
-      <div className={className ? `container ${className}` : "container"}>
+      <div
+        className={
+          className
+            ? `container mx-auto min-w-0 overflow-hidden px-4 sm:px-6 lg:px-8 ${className}`
+            : "container mx-auto min-w-0 overflow-hidden px-4 sm:px-6 lg:px-8"
+        }
+      >
         {children}
       </div>
     </>

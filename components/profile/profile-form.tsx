@@ -38,24 +38,6 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
-function getSubscriptionStatusBadge(status?: string) {
-  if (!status) return null;
-  const s = status.toLowerCase();
-  if (s === "active") {
-    return <Badge className="border-emerald-200 bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Active</Badge>;
-  }
-  if (s === "pending") {
-    return <Badge className="border-amber-200 bg-amber-100 text-amber-800 hover:bg-amber-100">Pending</Badge>;
-  }
-  if (s === "expired") {
-    return <Badge className="border-red-200 bg-red-100 text-red-800 hover:bg-red-100">Expired</Badge>;
-  }
-  if (s === "cancelled") {
-    return <Badge className="border-slate-200 bg-slate-100 text-slate-800 hover:bg-slate-100">Cancelled</Badge>;
-  }
-  return <Badge className="border-gray-200 bg-gray-100 capitalize text-gray-800 hover:bg-gray-100">{status}</Badge>;
-}
 import {
   Card,
   CardContent,
@@ -77,6 +59,44 @@ import { DatePicker } from "@/components/date-picker";
 import { useAcademicContext } from "@/components/providers/academic-context";
 
 import { ProfilePictureModal } from "./profile-picture-modal";
+
+function getSubscriptionStatusBadge(status?: string) {
+  if (!status) return null;
+  const s = status.toLowerCase();
+  if (s === "active") {
+    return (
+      <Badge className="border-emerald-200 bg-emerald-100 text-emerald-800 hover:bg-emerald-100">
+        Active
+      </Badge>
+    );
+  }
+  if (s === "pending") {
+    return (
+      <Badge className="border-amber-200 bg-amber-100 text-amber-800 hover:bg-amber-100">
+        Pending
+      </Badge>
+    );
+  }
+  if (s === "expired") {
+    return (
+      <Badge className="border-red-200 bg-red-100 text-red-800 hover:bg-red-100">
+        Expired
+      </Badge>
+    );
+  }
+  if (s === "cancelled") {
+    return (
+      <Badge className="border-slate-200 bg-slate-100 text-slate-800 hover:bg-slate-100">
+        Cancelled
+      </Badge>
+    );
+  }
+  return (
+    <Badge className="border-gray-200 bg-gray-100 capitalize text-gray-800 hover:bg-gray-100">
+      {status}
+    </Badge>
+  );
+}
 
 // Form validation schema
 const profileSchema = z
@@ -446,10 +466,10 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
     .slice(0, 2);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+    <form onSubmit={handleSubmit(onSubmit)} className="min-w-0 space-y-6">
+      <div className="flex min-w-0 flex-col gap-6 lg:flex-row lg:items-start">
         {/* Left Column: Avatar & Basic Info */}
-        <div className="flex flex-col gap-6 lg:w-1/3">
+        <div className="flex min-w-0 flex-col gap-6 lg:w-1/3">
           <Card className="overflow-hidden border-border/60 shadow-sm transition-all hover:shadow-md">
             <CardHeader className="bg-muted/30 pb-8 pt-6 text-center">
               <div className="relative mx-auto mb-4 flex size-24 items-center justify-center rounded-full bg-background p-1 shadow-sm ring-4 ring-background">
@@ -478,9 +498,8 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
                 ) : (
                   "Guest User"
                 )}
-                {profile?.subscription_status && (
-                  getSubscriptionStatusBadge(profile.subscription_status)
-                )}
+                {profile?.subscription_status &&
+                  getSubscriptionStatusBadge(profile.subscription_status)}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 p-6">
@@ -608,7 +627,7 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
         </div>
 
         {/* Right Column: Detailed Forms */}
-        <div className="flex-1 space-y-6">
+        <div className="min-w-0 flex-1 space-y-6">
           {/* Academic Section */}
           {(selectedRole === "student" || primaryRole === "student") && (
             <Card className="border-border/60 shadow-sm">
@@ -883,7 +902,7 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
               type="submit"
               size="lg"
               disabled={isSaving || !isDirty}
-              className="min-w-[140px]"
+              className="w-full sm:w-auto sm:min-w-[140px]"
             >
               {isSaving ? (
                 <>

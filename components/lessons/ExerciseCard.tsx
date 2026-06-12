@@ -5,6 +5,7 @@ import { AlertTriangle, CheckCircle2, Clock, RotateCcw, X } from "lucide-react";
 import { useLessonsStore } from "@/lib/store/lessons";
 import { Exercise, GeneralExercise } from "@/lib/types/lessons";
 import { cn } from "@/lib/utils";
+import { resolveMediaUrl } from "@/lib/utils/media";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 // import { useInView } from "framer-motion"; // Removed to fix infinite loop
@@ -394,7 +395,7 @@ export function ExerciseCard({ exercise, index, onAnswer }: ExerciseCardProps) {
             </Badge>
             Exercise Content
           </CardTitle>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {isFirstTry && (
               <Badge variant="secondary" className="text-xs">
                 First Try!
@@ -419,24 +420,22 @@ export function ExerciseCard({ exercise, index, onAnswer }: ExerciseCardProps) {
           </p>
         </div>
 
-        {exercise.image_path &&
-          (exercise.image_path.startsWith("/") ||
-            exercise.image_path.startsWith("http")) && (
-            <div className="my-2">
-              <Image
-                src={exercise.image_path}
-                alt={
-                  ("title" in exercise ? exercise.title : null) ||
-                  "Exercise illustration"
-                }
-                width={800}
-                height={450}
-                className="h-auto max-w-full rounded-lg"
-                style={{ width: "100%", height: "auto" }}
-                unoptimized
-              />
-            </div>
-          )}
+        {resolveMediaUrl(exercise.image_path) && (
+          <div className="my-2">
+            <Image
+              src={resolveMediaUrl(exercise.image_path) ?? ""}
+              alt={
+                ("title" in exercise ? exercise.title : null) ||
+                "Exercise illustration"
+              }
+              width={800}
+              height={450}
+              className="h-auto w-full max-w-full rounded-lg object-contain"
+              style={{ width: "100%", height: "auto" }}
+              unoptimized
+            />
+          </div>
+        )}
         {exercise.audio_path && (
           <AudioPlayer
             src={exercise.audio_path}
@@ -492,7 +491,7 @@ export function ExerciseCard({ exercise, index, onAnswer }: ExerciseCardProps) {
                 />
                 <Label
                   htmlFor={`ex-${exercise.id}-opt-${i}`}
-                  className="flex-1 cursor-pointer py-1 text-sm sm:text-base"
+                  className="min-w-0 flex-1 cursor-pointer break-words py-1 text-sm sm:text-base"
                 >
                   {answer}
                 </Label>

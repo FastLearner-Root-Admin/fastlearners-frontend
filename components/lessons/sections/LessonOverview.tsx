@@ -159,7 +159,7 @@ export function LessonOverview({
   }, [lesson.topic, lesson.title, objectives]);
 
   return (
-    <div className="flex h-full flex-col gap-6 overflow-y-auto p-1">
+    <div className="flex h-full min-w-0 flex-col gap-6 overflow-y-auto overflow-x-hidden p-1">
       {/* Skip Links for Accessibility */}
       <div className="sr-only">
         <a href="#main-content" className="skip-link">
@@ -176,13 +176,13 @@ export function LessonOverview({
       {/* Hero Section */}
       <Card className="border-2 bg-gradient-to-br from-primary/10 via-primary/5 to-background shadow-xl">
         <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-3">
               <div className="flex size-12 items-center justify-center rounded-xl bg-primary/20">
                 <BookOpen className="size-6 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-3xl" id="main-content">
+                <CardTitle className="text-2xl sm:text-3xl" id="main-content">
                   Lesson Overview
                 </CardTitle>
                 <p className="mt-1 text-sm text-muted-foreground">
@@ -211,7 +211,7 @@ export function LessonOverview({
           {/* Progress Context */}
           {hasStarted && (
             <div className="rounded-lg bg-muted/50 p-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-2">
                   <Trophy className="size-4 text-yellow-600" />
                   <span className="text-sm font-medium">
@@ -301,13 +301,13 @@ export function LessonOverview({
       {objectives.length > 0 && (
         <Card className="border-2 shadow-lg" id="objectives">
           <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex min-w-0 items-center gap-3">
                 <div className="flex size-12 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/30">
                   <Target className="size-6 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div>
-                  <CardTitle className="text-2xl">
+                  <CardTitle className="text-xl sm:text-2xl">
                     Learning Objectives
                   </CardTitle>
                   <p className="mt-1 text-sm text-muted-foreground">
@@ -408,12 +408,14 @@ export function LessonOverview({
       {Object.keys(key_concepts).length > 0 && (
         <Card className="border-2 shadow-lg" id="key-concepts">
           <CardHeader className="pb-4">
-            <div className="flex items-center gap-3">
+            <div className="flex min-w-0 items-center gap-3">
               <div className="flex size-12 items-center justify-center rounded-xl bg-yellow-100 dark:bg-yellow-900/30">
                 <Lightbulb className="size-6 text-yellow-600 dark:text-yellow-400" />
               </div>
               <div>
-                <CardTitle className="text-2xl">Key Concepts</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl">
+                  Key Concepts
+                </CardTitle>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Important concepts to understand
                 </p>
@@ -448,7 +450,7 @@ export function LessonOverview({
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-100"
+                            className="mt-3 w-full opacity-100 sm:absolute sm:bottom-2 sm:right-2 sm:mt-0 sm:w-auto sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100"
                             onClick={() => {
                               // TODO: Implement navigation to specific concept section
                               console.log(`Navigate to concept: ${concept}`);

@@ -5,6 +5,7 @@ import { BookOpen, CheckCircle, PlayCircle, Target } from "lucide-react";
 
 import type { LessonContent as LessonContentType } from "@/lib/types/lessons";
 import { cn } from "@/lib/utils";
+import { resolveMediaUrl } from "@/lib/utils/media";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -197,21 +198,19 @@ export function LessonContent({
                               {desc.description}
                             </p>
                           )}
-                          {desc.image_path &&
-                            (desc.image_path.startsWith("/") ||
-                              desc.image_path.startsWith("http")) && (
-                              <div className="my-2">
-                                <Image
-                                  src={desc.image_path}
-                                  alt={desc.heading || "Concept illustration"}
-                                  width={800}
-                                  height={450}
-                                  className="h-auto max-w-full rounded-lg"
-                                  style={{ width: "100%", height: "auto" }}
-                                  unoptimized
-                                />
-                              </div>
-                            )}
+                          {resolveMediaUrl(desc.image_path) && (
+                            <div className="my-2">
+                              <Image
+                                src={resolveMediaUrl(desc.image_path) ?? ""}
+                                alt={desc.heading || "Concept illustration"}
+                                width={800}
+                                height={450}
+                                className="h-auto w-full max-w-full rounded-lg object-contain"
+                                style={{ width: "100%", height: "auto" }}
+                                unoptimized
+                              />
+                            </div>
+                          )}
                           {desc.audio_path && (
                             <AudioPlayer
                               src={desc.audio_path}
@@ -273,21 +272,19 @@ export function LessonContent({
                             </span>
                           </p>
                         )}
-                        {example.image_path &&
-                          (example.image_path.startsWith("/") ||
-                            example.image_path.startsWith("http")) && (
-                            <div className="my-2">
-                              <Image
-                                src={example.image_path}
-                                alt={example.title || "Example illustration"}
-                                width={800}
-                                height={450}
-                                className="h-auto max-w-full rounded-lg"
-                                style={{ width: "100%", height: "auto" }}
-                                unoptimized
-                              />
-                            </div>
-                          )}
+                        {resolveMediaUrl(example.image_path) && (
+                          <div className="my-2">
+                            <Image
+                              src={resolveMediaUrl(example.image_path) ?? ""}
+                              alt={example.title || "Example illustration"}
+                              width={800}
+                              height={450}
+                              className="h-auto w-full max-w-full rounded-lg object-contain"
+                              style={{ width: "100%", height: "auto" }}
+                              unoptimized
+                            />
+                          </div>
+                        )}
                         {example.audio_path && (
                           <AudioPlayer
                             src={example.audio_path}

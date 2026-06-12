@@ -289,15 +289,16 @@ export function LessonViewer({
 
   return (
     <div
-      className="flex flex-col gap-6"
+      className="flex min-w-0 flex-col gap-6 overflow-hidden"
       ref={containerRef}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
       {/* Header with Breadcrumb and Progress */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <SectionBreadcrumb
+          className="w-full min-w-0 sm:flex-1"
           lessonId={lesson.id}
           concepts={concepts}
           currentStepIndex={currentStepIndex}
@@ -320,7 +321,7 @@ export function LessonViewer({
 
       {/* Navigation Tips */}
       <Card className="border-none bg-muted/30 shadow-sm">
-        <CardContent className="flex items-center justify-between px-4 py-2">
+        <CardContent className="flex flex-col gap-2 px-4 py-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span className="flex size-5 items-center justify-center rounded border bg-background font-mono text-[10px]">
               {currentStepIndex + 1}
@@ -334,7 +335,7 @@ export function LessonViewer({
       </Card>
 
       {/* Main Content */}
-      <div className="min-h-[400px] flex-1 rounded-xl sm:min-h-[500px] md:min-h-[600px]">
+      <div className="min-h-[400px] min-w-0 flex-1 overflow-hidden rounded-xl sm:min-h-[500px] md:min-h-[600px]">
         <SectionRenderer
           lesson={lesson}
           currentStepIndex={currentStepIndex}

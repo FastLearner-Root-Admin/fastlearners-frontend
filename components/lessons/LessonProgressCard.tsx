@@ -32,7 +32,7 @@ export const LessonProgressCard = React.memo(
     return (
       <Card
         className={cn(
-          "border-2 bg-gradient-to-r from-primary/5 via-primary/10 to-background transition-all duration-300",
+          "w-full border-2 bg-gradient-to-r from-primary/5 via-primary/10 to-background transition-all duration-300 sm:max-w-sm",
           progress >= 100 &&
             "border-green-200 bg-gradient-to-r from-green-50 via-green-100 to-background",
           progressCardCollapsed && "hidden",
@@ -40,7 +40,7 @@ export const LessonProgressCard = React.memo(
       >
         <CardContent className="responsive-padding">
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="responsive-gap flex flex-col items-start justify-between sm:flex-row sm:items-center">
                 <div className="flex size-8 items-center justify-center rounded-lg bg-primary/20 transition-colors sm:size-10">
                   {progress >= 100 ? (
@@ -63,7 +63,7 @@ export const LessonProgressCard = React.memo(
                   )}
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 {estimatedTimeRemaining && (
                   <Badge variant="outline" className="text-[10px] sm:text-xs">
                     <Clock className="mr-1 size-3" />~{estimatedTimeRemaining}

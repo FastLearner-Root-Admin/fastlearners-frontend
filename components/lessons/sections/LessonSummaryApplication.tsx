@@ -157,11 +157,11 @@ export function LessonSummaryApplication({
   ];
 
   return (
-    <div className="flex h-full flex-col gap-6 overflow-y-auto p-1">
+    <div className="flex h-full min-w-0 flex-col gap-6 overflow-y-auto overflow-x-hidden p-1">
       {/* Progress Indicator */}
       <Card className="border-2 bg-gradient-to-r from-green-50/50 to-blue-50/50 dark:from-green-950/20 dark:to-blue-950/20">
         <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h3 className="text-lg font-semibold">Lesson Progress</h3>
               <p className="text-sm text-muted-foreground">
@@ -170,7 +170,7 @@ export function LessonSummaryApplication({
             </div>
             <div className="text-right">
               <div className="text-2xl font-bold">{progress}%</div>
-              <Progress value={progress} className="w-32" />
+              <Progress value={progress} className="w-full sm:w-32" />
             </div>
           </div>
         </CardContent>
@@ -186,7 +186,7 @@ export function LessonSummaryApplication({
                 <FileText className="size-6 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <CardTitle className="text-2xl">Summary</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl">Summary</CardTitle>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Key takeaways from this lesson
                 </p>
@@ -234,7 +234,9 @@ export function LessonSummaryApplication({
                 <Lightbulb className="size-6 text-purple-600 dark:text-purple-400" />
               </div>
               <div>
-                <CardTitle className="text-2xl">Application</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl">
+                  Application
+                </CardTitle>
                 <p className="mt-1 text-sm text-muted-foreground">
                   How to apply what you&apos;ve learned
                 </p>
@@ -401,7 +403,7 @@ export function LessonSummaryApplication({
       {/* Next Steps */}
       <Card className="border-2 bg-gradient-to-r from-orange-50/50 to-red-50/50 dark:from-orange-950/20 dark:to-red-950/20">
         <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h3 className="text-lg font-semibold">Next Steps</h3>
               <p className="text-sm text-muted-foreground">

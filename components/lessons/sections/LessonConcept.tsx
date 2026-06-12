@@ -13,6 +13,7 @@ import {
 import { selectConceptScore, useLessonsStore } from "@/lib/store/lessons";
 import { Concept } from "@/lib/types/lessons";
 import { cn } from "@/lib/utils";
+import { resolveMediaUrl } from "@/lib/utils/media";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,7 +44,7 @@ const ExampleCard = React.memo(
           onClick={() => setIsFlipped(!isFlipped)}
         >
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2">
                 <div className="flex size-8 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
                   <Sparkles className="size-4 text-emerald-700 dark:text-emerald-400" />
@@ -111,21 +112,19 @@ const ExampleCard = React.memo(
                       <span className="mr-2">✓</span>Answer: {example.answer}
                     </p>
                   </div>
-                  {example.image_path &&
-                    (example.image_path.startsWith("/") ||
-                      example.image_path.startsWith("http")) && (
-                      <div className="my-2">
-                        <Image
-                          src={example.image_path}
-                          alt={example.title || "Example illustration"}
-                          width={800}
-                          height={450}
-                          className="h-auto max-w-full rounded-lg"
-                          style={{ width: "100%", height: "auto" }}
-                          unoptimized
-                        />
-                      </div>
-                    )}
+                  {resolveMediaUrl(example.image_path) && (
+                    <div className="my-2">
+                      <Image
+                        src={resolveMediaUrl(example.image_path) ?? ""}
+                        alt={example.title || "Example illustration"}
+                        width={800}
+                        height={450}
+                        className="h-auto w-full max-w-full rounded-lg object-contain"
+                        style={{ width: "100%", height: "auto" }}
+                        unoptimized
+                      />
+                    </div>
+                  )}
                   {example.audio_path && (
                     <AudioPlayer
                       src={example.audio_path}
@@ -224,7 +223,7 @@ export const LessonConcept = React.memo(function LessonConcept({
   }, [concept.id, fetchConceptScore]);
 
   return (
-    <div className="flex h-full flex-col gap-6 overflow-y-auto p-1">
+    <div className="flex h-full min-w-0 flex-col gap-6 overflow-y-auto overflow-x-hidden p-1">
       <DismissibleCard
         id="lesson_concept_intro"
         title="How to complete this concept"
@@ -250,13 +249,13 @@ export const LessonConcept = React.memo(function LessonConcept({
           )}
           onClick={toggleExpanded}
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
               <div className="flex size-12 items-center justify-center rounded-xl bg-yellow-100 dark:bg-yellow-900/30">
                 <Lightbulb className="size-6 text-yellow-600 dark:text-yellow-400" />
               </div>
               <div>
-                <CardTitle className="text-2xl text-foreground">
+                <CardTitle className="break-words text-xl text-foreground sm:text-2xl">
                   {concept.title}
                 </CardTitle>
                 <p className="mt-1 text-sm text-muted-foreground">
@@ -281,7 +280,7 @@ export const LessonConcept = React.memo(function LessonConcept({
         </CardHeader>
 
         {isExpanded && (
-          <CardContent className="space-y-8 p-6">
+          <CardContent className="space-y-8 p-4 sm:p-6">
             {/* Description */}
             <div className="space-y-6">
               {(concept.description || []).map((desc, i) => (
@@ -299,21 +298,19 @@ export const LessonConcept = React.memo(function LessonConcept({
                       {desc.description}
                     </p>
                   )}
-                  {desc.image_path &&
-                    (desc.image_path.startsWith("/") ||
-                      desc.image_path.startsWith("http")) && (
-                      <div className="my-2">
-                        <Image
-                          src={desc.image_path}
-                          alt={desc.heading || "Concept illustration"}
-                          width={800}
-                          height={450}
-                          className="h-auto max-w-full rounded-lg"
-                          style={{ width: "100%", height: "auto" }}
-                          unoptimized
-                        />
-                      </div>
-                    )}
+                  {resolveMediaUrl(desc.image_path) && (
+                    <div className="my-2">
+                      <Image
+                        src={resolveMediaUrl(desc.image_path) ?? ""}
+                        alt={desc.heading || "Concept illustration"}
+                        width={800}
+                        height={450}
+                        className="h-auto w-full max-w-full rounded-lg object-contain"
+                        style={{ width: "100%", height: "auto" }}
+                        unoptimized
+                      />
+                    </div>
+                  )}
                   {desc.audio_path && (
                     <AudioPlayer
                       src={desc.audio_path}
