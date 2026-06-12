@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronRight, Home } from "lucide-react";
+import { ChevronRight, Home, MoreHorizontal } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -79,16 +79,15 @@ export function Breadcrumb({
     <nav
       aria-label="Breadcrumb"
       className={cn(
-        "flex max-w-full items-center space-x-0.5 overflow-hidden text-xs text-muted-foreground sm:space-x-1 sm:text-sm",
+        "flex min-w-0 max-w-full items-center space-x-0.5 overflow-hidden whitespace-nowrap text-xs text-muted-foreground sm:space-x-1 sm:text-sm",
         className,
       )}
     >
       <Home className="size-3.5 shrink-0 sm:size-4" />
       {breadcrumbs.map((item, index) => {
-        // Logical check for mobile: if more than 2 items, only show the first and last two
-        // Actually, the plan says "last 2 items on mobile with ellipsis for middle"
         const isMiddleItem =
-          breadcrumbs.length > 2 && index > 0 && index < breadcrumbs.length - 2;
+          breadcrumbs.length > 4 && index > 1 && index < breadcrumbs.length - 2;
+        const shouldShowEllipsis = isMiddleItem && index === 2;
 
         return (
           <React.Fragment key={item.href}>
@@ -96,17 +95,26 @@ export function Breadcrumb({
               <ChevronRight className="size-3.5 shrink-0 sm:size-4" />
             )}
             {isMiddleItem ? (
-              index === 1 ? (
-                <span className="px-0.5">...</span>
+              shouldShowEllipsis ? (
+                <span
+                  className="flex shrink-0 items-center px-0.5"
+                  aria-hidden="true"
+                >
+                  <MoreHorizontal className="size-4" />
+                </span>
               ) : null
             ) : item.isLast ? (
-              <span className="max-w-[120px] truncate font-medium text-foreground sm:max-w-[200px] md:max-w-none">
+              <span
+                className="max-w-[110px] truncate font-medium text-foreground sm:max-w-[180px] lg:max-w-[260px]"
+                title={item.title}
+              >
                 {item.title}
               </span>
             ) : (
               <Link
                 href={item.href}
-                className="max-w-[80px] truncate transition-colors hover:text-foreground sm:max-w-[150px] md:max-w-none"
+                className="max-w-[72px] truncate transition-colors hover:text-foreground sm:max-w-[130px] lg:max-w-[180px]"
+                title={item.title}
               >
                 {item.title}
               </Link>

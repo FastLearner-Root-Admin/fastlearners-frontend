@@ -59,7 +59,7 @@ export function SectionBreadcrumb({
 
   return (
     <HorizontalScroll className={cn("block pb-2", className)}>
-      <div className="flex items-center gap-2">
+      <div className="flex min-w-max items-center gap-2">
         {sections.map((section, index) => {
           const progress = sectionProgress[section.id];
           const isCompleted = progress?.isCompleted;

@@ -86,10 +86,10 @@ export default function Dashboard({ children }: ProtectedLayoutProps) {
               className="sticky top-0 flex h-14 border-b border-border/40 bg-background/80 px-component-sm backdrop-blur-md sm:px-component-md lg:h-[60px] xl:px-component-lg"
               style={{ zIndex: Z_INDEX.navbar }}
             >
-              <div className="responsive-gap flex w-full items-center">
+              <div className="responsive-gap flex w-full min-w-0 items-center">
                 <MobileSheetSidebar links={filteredLinks} />
 
-                <div className="w-full flex-1">
+                <div className="min-w-0 flex-1">
                   <Breadcrumb />
                 </div>
 

@@ -79,22 +79,32 @@ export default async function LessonPage({
   return (
     <div className="min-w-0 space-y-6 pb-20">
       {/* Breadcrumb Navigation */}
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
+      <Breadcrumb className="max-w-full overflow-hidden">
+        <BreadcrumbList className="flex-nowrap overflow-hidden whitespace-nowrap">
+          <BreadcrumbItem className="hidden sm:inline-flex">
             <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
           </BreadcrumbItem>
-          <BreadcrumbSeparator />
+          <BreadcrumbSeparator className="hidden sm:inline-flex" />
           <BreadcrumbItem>
             <BreadcrumbLink href="/dashboard/lessons">Lessons</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{subject}</BreadcrumbPage>
+          <BreadcrumbItem className="hidden min-w-0 md:inline-flex">
+            <BreadcrumbPage
+              className="max-w-[160px] truncate lg:max-w-[220px]"
+              title={subject}
+            >
+              {subject}
+            </BreadcrumbPage>
           </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{topic}</BreadcrumbPage>
+          <BreadcrumbSeparator className="hidden md:inline-flex" />
+          <BreadcrumbItem className="min-w-0 flex-1">
+            <BreadcrumbPage
+              className="max-w-[220px] truncate sm:max-w-[320px] lg:max-w-[420px]"
+              title={topic}
+            >
+              {topic}
+            </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
