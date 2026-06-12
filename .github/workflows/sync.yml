@@ -1,14 +1,23 @@
 name: Scheduled Upstream Sync
 
+# Safely cancels a running sync if a new one is manually triggered
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   schedule:
-    - cron: '0 0 * * *' # Runs every day at midnight UTC
-  workflow_dispatch: # Allows you to manually trigger the sync anytime
+    - cron: '0 0 * * *' # Runs automatically every day at midnight UTC
+  workflow_dispatch: # Allows you to manually trigger the sync anytime from the UI
 
 jobs:
   sync_latest_from_upstream:
     runs-on: ubuntu-latest
     name: Sync latest commits from upstream repo
+    
+    # Crucial: Grants the runner authorization to push changes into your fork
+    permissions:
+      contents: write
 
     steps:
     # Step 1: Checkout your fork
@@ -26,6 +35,7 @@ jobs:
         upstream_sync_branch: main
         target_sync_branch: main
         target_branch_checkout: main
+        target_repo_token: ${{ secrets.GITHUB_TOKEN }} # Uses the token to authenticate push
 
     # Optional: Handle sync failures (like merge conflicts)
     - name: Check for failure
