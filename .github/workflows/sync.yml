@@ -29,7 +29,7 @@ jobs:
     # Step 2: Sync from downstream to upstream
     - name: Sync upstream changes
       id: sync
-      uses: aormsby/upstream-sync-action@v2.0
+      uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
       with:
         upstream_sync_repo: travis-wayne/fastlearners-frontend
         upstream_sync_branch: main
