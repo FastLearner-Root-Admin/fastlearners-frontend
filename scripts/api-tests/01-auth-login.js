@@ -2,7 +2,7 @@ const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
 
-const BASE_URL = "https://api.fastlearnersapp.com";
+const BASE_URL = "https://app.fastlearnersapp.com";
 const CREDENTIALS = {
   email_phone: "student@fastlearnersapp.com",
   password: "password",

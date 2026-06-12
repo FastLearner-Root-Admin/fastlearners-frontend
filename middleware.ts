@@ -28,7 +28,7 @@ async function getUserRoleFromBackend(
   const BASE_URL =
     process.env.NEXT_PUBLIC_API_URL ||
     (process.env.NODE_ENV === "production"
-      ? "https://api.fastlearnersapp.com/api/v1"
+      ? "https://app.fastlearnersapp.com/api/v1"
       : null);
 
   if (!BASE_URL) {
@@ -233,7 +233,7 @@ export async function middleware(request: NextRequest) {
           const BASE_URL =
             process.env.NEXT_PUBLIC_API_URL ||
             (process.env.NODE_ENV === "production"
-              ? "https://api.fastlearnersapp.com/api/v1"
+              ? "https://app.fastlearnersapp.com/api/v1"
               : null);
 
           if (BASE_URL) {

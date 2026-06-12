@@ -26,7 +26,7 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "api.fastlearnersapp.com",
+        hostname: "app.fastlearnersapp.com",
       },
     ],
   },

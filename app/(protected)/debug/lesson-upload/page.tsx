@@ -234,7 +234,7 @@ export default function DebugLessonUploadPage() {
                 <p>
                   Base URL:{" "}
                   {process.env.NEXT_PUBLIC_API_URL ||
-                    "https://api.fastlearnersapp.com/api/v1"}
+                    "https://app.fastlearnersapp.com/api/v1"}
                 </p>
               </code>
             </div>

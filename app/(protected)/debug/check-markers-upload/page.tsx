@@ -562,7 +562,7 @@ Number Bases System,5,5,20,25,25,0,0,0,0,20`;
                   <p className="mt-1 text-sm text-muted-foreground">
                     Endpoint:{" "}
                     {process.env.NEXT_PUBLIC_API_URL ||
-                      "https://api.fastlearnersapp.com/api/v1"}
+                      "https://app.fastlearnersapp.com/api/v1"}
                     /superadmin/lessons/uploads/check-markers
                   </p>
                 </div>
@@ -597,7 +597,7 @@ Number Bases System,5,5,20,25,25,0,0,0,0,20`;
                   <p className="mt-1 text-sm text-muted-foreground">
                     Endpoint:{" "}
                     {process.env.NEXT_PUBLIC_API_URL ||
-                      "https://api.fastlearnersapp.com/api/v1"}
+                      "https://app.fastlearnersapp.com/api/v1"}
                     /superadmin/lessons/uploads/all-lesson-files
                   </p>
                 </div>

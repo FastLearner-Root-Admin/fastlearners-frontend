@@ -38,7 +38,7 @@ export function getYouTubeEmbedUrl(
   return null;
 }
 
-const DEFAULT_API_ORIGIN = "https://api.fastlearnersapp.com";
+const DEFAULT_API_ORIGIN = "https://app.fastlearnersapp.com";
 
 function getApiOrigin() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
