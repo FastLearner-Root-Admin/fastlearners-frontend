@@ -8,13 +8,11 @@ import { Menu, X } from "lucide-react";
 
 import { docsConfig } from "@/config/docs";
 import { marketingConfig } from "@/config/marketing";
-import { siteConfig } from "@/config/site";
 import { Z_INDEX } from "@/config/z-index";
 import { cn } from "@/lib/utils";
 import { useLockBody } from "@/hooks/use-lock-body";
 import { DocsSidebarNav } from "@/components/docs/sidebar-nav";
 import { ClientOnly } from "@/components/shared/client-only";
-import { Icons } from "@/components/shared/icons";
 
 import { ModeToggle } from "./mode-toggle";
 
@@ -130,10 +128,6 @@ export function NavMobile() {
         ) : null}
 
         <div className="mt-component-md flex items-center justify-end space-x-component-md">
-          <Link href={siteConfig.links.github} target="_blank" rel="noreferrer">
-            <Icons.gitHub className="size-6" />
-            <span className="sr-only">GitHub</span>
-          </Link>
           <ModeToggle />
         </div>
       </nav>

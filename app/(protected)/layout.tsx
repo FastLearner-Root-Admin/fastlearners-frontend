@@ -8,7 +8,6 @@ import { useAuthStore } from "@/store/authStore";
 import { sidebarLinks } from "@/config/dashboard";
 import { Z_INDEX } from "@/config/z-index";
 import { useAuthInit } from "@/hooks/useAuthInit";
-import { Breadcrumb } from "@/components/dashboard/breadcrumb";
 import { SearchCommand } from "@/components/dashboard/search-command";
 import {
   DashboardSidebar,
@@ -78,20 +77,17 @@ export default function Dashboard({ children }: ProtectedLayoutProps) {
   return (
     <AcademicProvider>
       <FontProvider>
-        <div className="relative flex min-h-screen w-full">
+        <div className="relative flex min-h-screen w-full overflow-x-hidden">
           <DashboardSidebar links={filteredLinks} />
 
-          <div className="flex flex-1 flex-col">
+          <div className="flex min-w-0 flex-1 flex-col">
             <header
               className="sticky top-0 flex h-14 border-b border-border/40 bg-background/80 px-component-sm backdrop-blur-md sm:px-component-md lg:h-[60px] xl:px-component-lg"
               style={{ zIndex: Z_INDEX.navbar }}
             >
               <div className="responsive-gap flex w-full min-w-0 items-center">
                 <MobileSheetSidebar links={filteredLinks} />
-
-                <div className="min-w-0 flex-1">
-                  <Breadcrumb />
-                </div>
+                <div className="min-w-0 flex-1" />
 
                 <SearchCommand links={filteredLinks} className="mr-2" />
                 <NetworkStatus className="mr-2" />
@@ -108,8 +104,8 @@ export default function Dashboard({ children }: ProtectedLayoutProps) {
               <ProfileCompletionBanner />
             </div>
 
-            <main className="flex-1 px-component-sm pb-control-lg pt-component-sm sm:px-component-md sm:pb-16 sm:pt-component-md xl:px-component-lg">
-              <div className="responsive-gap flex size-full flex-col">
+            <main className="min-w-0 flex-1 overflow-x-hidden px-component-sm pb-control-lg pt-component-sm sm:px-component-md sm:pb-16 sm:pt-component-md xl:px-component-lg">
+              <div className="responsive-gap flex size-full min-w-0 max-w-full flex-col overflow-x-hidden">
                 {children}
               </div>
             </main>

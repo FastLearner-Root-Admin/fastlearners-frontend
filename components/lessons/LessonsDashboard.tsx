@@ -209,7 +209,7 @@ export function LessonsDashboard() {
 
   if (!currentClass || !currentTerm) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="container mx-auto px-4 py-6 sm:px-6">
         <Card className="border-2 border-dashed">
           <CardContent className="p-12 text-center">
             <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-full bg-primary/10 sm:size-20">
@@ -268,7 +268,7 @@ export function LessonsDashboard() {
   return (
     <div className="space-y-8">
       {/* Hero Section */}
-      <div className="responsive-padding relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-background">
+      <div className="responsive-padding relative min-w-0 overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-background">
         <div className="relative z-10">
           <div className="mb-4 flex items-center gap-2">
             <div className="flex size-8 items-center justify-center rounded-xl bg-primary/20 sm:size-10 md:size-12">

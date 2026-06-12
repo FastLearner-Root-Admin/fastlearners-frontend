@@ -65,7 +65,7 @@ export function PageContainer({
   return (
     <div
       className={cn(
-        "mx-auto w-full",
+        "mx-auto w-full min-w-0 max-w-full overflow-x-hidden",
         maxWidthClasses[maxWidth],
         withPadding && "px-4 sm:px-6 lg:px-8",
         withBottomPadding && "pb-16 sm:pb-8",
@@ -94,19 +94,23 @@ export function PageHeader({
   className,
 }: PageHeaderProps) {
   return (
-    <div className={cn("space-y-1 pb-4 pt-2", className)}>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+    <div className={cn("min-w-0 space-y-1 pb-4 pt-2", className)}>
+      <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="break-words text-2xl font-bold tracking-tight sm:text-3xl">
             {title}
           </h1>
           {description && (
-            <p className="text-sm text-muted-foreground sm:text-base">
+            <p className="break-words text-sm text-muted-foreground sm:text-base">
               {description}
             </p>
           )}
         </div>
-        {children && <div className="flex items-center gap-2">{children}</div>}
+        {children && (
+          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
+            {children}
+          </div>
+        )}
       </div>
     </div>
   );

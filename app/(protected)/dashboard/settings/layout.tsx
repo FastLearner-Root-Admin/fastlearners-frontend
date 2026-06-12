@@ -83,15 +83,15 @@ export default function SettingsLayout({
 
   return (
     <Main fixed>
-      <div className="space-y-6">
+      <div className="min-w-0 space-y-6">
         <DashboardHeader
           heading="Settings"
           text="Manage account and website settings."
         />
         <Separator />
 
-        <div className="scrollbar-hide flex overflow-x-auto pb-1">
-          <nav className="flex space-x-4">
+        <div className="mobile-scroll-x flex pb-1">
+          <nav className="flex min-w-max space-x-2 sm:space-x-4">
             {navItems.map((item) => (
               <Link
                 key={item.href}
@@ -109,7 +109,7 @@ export default function SettingsLayout({
           </nav>
         </div>
 
-        <div className="divide-y divide-muted pb-10">{children}</div>
+        <div className="min-w-0 divide-y divide-muted pb-10">{children}</div>
       </div>
     </Main>
   );

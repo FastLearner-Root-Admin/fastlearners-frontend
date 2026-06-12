@@ -82,6 +82,11 @@
     @apply border-border;
   }
 
+  html,
+  body {
+    @apply max-w-full overflow-x-hidden;
+  }
+
   body {
     @apply bg-background text-foreground;
     font-feature-settings:
@@ -148,6 +153,18 @@
 
   .mobile-touch-target {
     @apply min-h-[44px] min-w-[44px];
+  }
+
+  .mobile-safe {
+    @apply min-w-0 max-w-full overflow-x-hidden;
+  }
+
+  .mobile-scroll-x {
+    @apply max-w-full overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:thin];
+  }
+
+  .responsive-media {
+    @apply h-auto max-w-full object-contain;
   }
 }
 

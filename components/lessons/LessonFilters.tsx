@@ -96,9 +96,9 @@ export function LessonFilters({
 
   if (compact) {
     return (
-      <div className="flex flex-col flex-wrap items-center gap-2 sm:flex-row">
+      <div className="flex min-w-0 flex-col flex-wrap items-stretch gap-2 sm:flex-row sm:items-center">
         {isLoadingMetadata ? (
-          <div className="flex gap-2">
+          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
             <Skeleton className="h-10 w-32" />
             <Skeleton className="h-10 w-32" />
             <Skeleton className="h-10 w-32" />
@@ -198,7 +198,7 @@ export function LessonFilters({
 
   if (variant === "horizontal-bar") {
     return (
-      <div className="flex flex-col gap-4 rounded-lg border bg-card p-4 shadow-sm md:flex-row md:items-center md:gap-2">
+      <div className="flex min-w-0 flex-col gap-4 rounded-lg border bg-card p-3 shadow-sm sm:p-4 md:flex-row md:items-center md:gap-2">
         {showTitle && (
           <div className="flex items-center gap-2 pr-2 md:mr-2 md:border-r">
             <Filter className="size-4 text-primary" />
@@ -209,14 +209,14 @@ export function LessonFilters({
         )}
 
         {isLoadingMetadata ? (
-          <div className="grid grid-cols-2 gap-2 md:flex md:flex-1">
+          <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-2 md:flex md:flex-1">
             <Skeleton className="h-10 w-full md:w-32" />
             <Skeleton className="h-10 w-full md:w-32" />
             <Skeleton className="h-10 w-full md:w-32" />
             <Skeleton className="h-10 w-full md:w-24" />
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-2 md:flex md:flex-1 md:items-center">
+          <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-2 md:flex md:flex-1 md:items-center">
             <Select
               value={filters.class}
               onValueChange={(value) => handleFilterChange("class", value)}
@@ -281,7 +281,7 @@ export function LessonFilters({
               </SelectContent>
             </Select>
 
-            <div className="col-span-2 flex items-center gap-2 md:col-span-1 md:ml-auto">
+            <div className="flex flex-col gap-2 sm:col-span-2 sm:flex-row sm:items-center md:col-span-1 md:ml-auto">
               {hasAnyFilter && (
                 <Button
                   variant="ghost"
@@ -318,8 +318,8 @@ export function LessonFilters({
     >
       {showTitle && (
         <CardHeader className={cn("pb-4", sidebar && "px-0")}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+          <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-3">
               <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 sm:size-10">
                 <Filter className="size-4 text-primary sm:size-5" />
               </div>

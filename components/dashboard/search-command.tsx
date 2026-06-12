@@ -51,7 +51,7 @@ export function SearchCommand({
       <Button
         variant="outline"
         className={cn(
-          "relative size-9 justify-center rounded-md bg-muted/50 p-0 text-sm font-normal text-muted-foreground shadow-none sm:w-full sm:justify-start sm:px-3 sm:pr-12 md:w-64 lg:w-72",
+          "relative size-9 shrink-0 justify-center rounded-md bg-muted/50 p-0 text-sm font-normal text-muted-foreground shadow-none sm:w-48 sm:justify-start sm:px-3 sm:pr-12 md:w-64 lg:w-72",
           className,
         )}
         onClick={() => setOpen(true)}
@@ -73,22 +73,22 @@ export function SearchCommand({
           {links.map((section) => {
             if (section.items.length === 0) return null;
             return (
-            <CommandGroup key={section.title} heading={section.title}>
-              {section.items.map((item) => {
-                const Icon = Icons[item.icon || "arrowRight"];
-                return (
-                  <CommandItem
-                    key={item.title}
-                    onSelect={() => {
-                      runCommand(() => router.push(item.href as string));
-                    }}
-                  >
-                    <Icon className="mr-2 size-5" />
-                    {item.title}
-                  </CommandItem>
-                );
-              })}
-            </CommandGroup>
+              <CommandGroup key={section.title} heading={section.title}>
+                {section.items.map((item) => {
+                  const Icon = Icons[item.icon || "arrowRight"];
+                  return (
+                    <CommandItem
+                      key={item.title}
+                      onSelect={() => {
+                        runCommand(() => router.push(item.href as string));
+                      }}
+                    >
+                      <Icon className="mr-2 size-5" />
+                      {item.title}
+                    </CommandItem>
+                  );
+                })}
+              </CommandGroup>
             );
           })}
         </CommandList>
