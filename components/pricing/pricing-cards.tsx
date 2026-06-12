@@ -25,6 +25,9 @@ export function PricingCards({ userId, subscriptionPlan }: PricingCardsProps) {
   const { setShowSignInModal } = useContext(ModalContext);
 
   const PricingCard = ({ offer }: { offer: SubscriptionPlan }) => {
+    const monthlyPrice =
+      offer.prices.monthly > 0 ? `₦${offer.prices.monthly}` : "₦0";
+
     return (
       <div
         className={cn(
@@ -43,9 +46,7 @@ export function PricingCards({ userId, subscriptionPlan }: PricingCardsProps) {
           <div className="flex flex-row">
             <div className="flex items-end">
               <div className="flex text-left text-2xl font-semibold leading-6 sm:text-3xl lg:text-4xl">
-                {offer.prices.monthly > 0
-                  ? `$${offer.prices.monthly}`
-                  : "Contact us"}
+                {monthlyPrice}
               </div>
               {offer.prices.monthly > 0 ? (
                 <div className="-mb-1 ml-2 text-left text-sm font-medium text-muted-foreground">
