@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format, parse } from "date-fns";
+import { format } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -33,6 +33,7 @@ import {
 } from "@/lib/api/profile";
 import { UserRole } from "@/lib/types/auth";
 import { ProfilePageData } from "@/lib/types/profile";
+import { isValidDate, parseProfileDate } from "@/lib/utils/dates";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -71,7 +72,10 @@ const createOnboardingSchema = (
       username: z.string().optional(),
       email: z.string().email("Please enter a valid email address"),
       phone: z.string().optional(),
-      date_of_birth: z.date().optional(),
+      date_of_birth: z.preprocess(
+        (value) => (isValidDate(value) ? value : undefined),
+        z.date().optional(),
+      ),
       gender: z.enum(["male", "female"]).optional(),
       country: z.string().optional(),
       state: z.string().optional(),
@@ -371,12 +375,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
         setValue("school", profileData.school || "");
         setValue("class", profileData.class || "");
         setValue("discipline", profileData.discipline || "");
-        setValue(
-          "date_of_birth",
-          profileData.date_of_birth
-            ? parse(profileData.date_of_birth, "dd/MM/yyyy", new Date())
-            : undefined,
-        );
+        setValue("date_of_birth", parseProfileDate(profileData.date_of_birth));
         setValue("gender", genderValue);
         setValue("country", profileData.country || "");
         setValue("state", profileData.state || "");

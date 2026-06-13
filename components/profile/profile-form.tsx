@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format, parse } from "date-fns";
+import { format } from "date-fns";
 import {
   AlertCircle,
   Calendar,
@@ -34,6 +34,7 @@ import {
   validateProfileData,
 } from "@/lib/api/profile";
 import { ProfilePageData } from "@/lib/types/profile";
+import { isValidDate, parseProfileDate } from "@/lib/utils/dates";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -109,7 +110,10 @@ const profileSchema = z
     school: z.string().optional(),
     class: z.string().optional(),
     discipline: z.string().optional(),
-    date_of_birth: z.date().optional(),
+    date_of_birth: z.preprocess(
+      (value) => (isValidDate(value) ? value : undefined),
+      z.date().optional(),
+    ),
     gender: z.enum(["male", "female"]).optional(),
     country: z.string().optional(),
     state: z.string().optional(),
@@ -298,9 +302,7 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
           school: profileData.school || "",
           class: profileData.class || "",
           discipline: profileData.discipline || "",
-          date_of_birth: profileData.date_of_birth
-            ? parse(profileData.date_of_birth, "dd/MM/yyyy", new Date())
-            : undefined,
+          date_of_birth: parseProfileDate(profileData.date_of_birth),
           gender: genderValue,
           country: profileData.country || "",
           state: profileData.state || "",
