@@ -11,11 +11,24 @@ export interface DashboardProgress {
 
 export interface DashboardContent {
   name: string;
-  subjects: string;
-  lessons: string;
-  progress: DashboardProgress;
-  quizzes: string;
-  subscription_status: string;
+  cards?: {
+    class?: string;
+    total_subjects?: number | string;
+    subscription?: {
+      status?: string | null;
+      expires_at?: string | null;
+      days_remaining?: number | string | null;
+    } | null;
+    account_status?: string | null;
+  };
+  lessons_covered?: number | string;
+  total_lessons?: number | string;
+  subjects?: string;
+  lessons?: string;
+  progress?: DashboardProgress;
+  quizzes?: string;
+  subscription_status?: string;
+  account_status?: string;
 }
 
 export interface DashboardResponse {
@@ -62,6 +75,13 @@ export async function getDashboard(): Promise<DashboardResponse> {
         message: data.message || "Failed to fetch dashboard",
         content: {
           name: "",
+          cards: {
+            total_subjects: 0,
+            subscription: { status: "inactive" },
+            account_status: "",
+          },
+          lessons_covered: 0,
+          total_lessons: 0,
           subjects: "",
           lessons: "",
           progress: {
@@ -71,6 +91,7 @@ export async function getDashboard(): Promise<DashboardResponse> {
           },
           quizzes: "",
           subscription_status: "",
+          account_status: "",
         },
         code: response.status,
       };
@@ -83,6 +104,13 @@ export async function getDashboard(): Promise<DashboardResponse> {
       message: error?.message || "Network error",
       content: {
         name: "",
+        cards: {
+          total_subjects: 0,
+          subscription: { status: "inactive" },
+          account_status: "",
+        },
+        lessons_covered: 0,
+        total_lessons: 0,
         subjects: "",
         lessons: "",
         progress: {
@@ -92,6 +120,7 @@ export async function getDashboard(): Promise<DashboardResponse> {
         },
         quizzes: "",
         subscription_status: "",
+        account_status: "",
       },
       code: 500,
     };

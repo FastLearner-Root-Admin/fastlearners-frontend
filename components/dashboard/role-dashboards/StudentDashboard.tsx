@@ -67,6 +67,30 @@ const itemVariants = {
   },
 };
 
+function getDashboardValue(value: unknown, fallback = "—"): string | number {
+  if (value === null || value === undefined || value === "") return fallback;
+  if (typeof value === "number" || typeof value === "string") return value;
+  return fallback;
+}
+
+function getAccountStatusBadge(status: string | undefined | null) {
+  const normalized = status?.trim().toLowerCase() || "inactive";
+
+  if (normalized === "active") {
+    return (
+      <Badge className="border-emerald-200 bg-emerald-100 text-emerald-800 hover:bg-emerald-100 dark:border-emerald-900/40 dark:bg-emerald-950/40 dark:text-emerald-300">
+        Active
+      </Badge>
+    );
+  }
+
+  return (
+    <Badge variant="secondary" className="capitalize">
+      {normalized.replace(/_/g, " ")}
+    </Badge>
+  );
+}
+
 export function StudentDashboard() {
   const { user } = useAuthStore();
   const { currentTermApiId, currentClass } = useAcademicContext();
@@ -183,17 +207,31 @@ export function StudentDashboard() {
   }, [currentTermApiId]);
 
   // Derived data for donut
+  const lessonsCovered = Number(
+    dashboardData?.lessons_covered ?? dashboardData?.progress?.covered ?? 0,
+  );
+  const totalLessons = Number(
+    dashboardData?.total_lessons ??
+      ((dashboardData?.progress?.covered ?? 0) +
+        (dashboardData?.progress?.left ?? 0)),
+  );
+  const lessonsLeft = Math.max(0, totalLessons - lessonsCovered);
+  const totalSubjects =
+    dashboardData?.cards?.total_subjects ?? dashboardData?.subjects;
+  const subscriptionStatus =
+    dashboardData?.cards?.subscription?.status ??
+    dashboardData?.subscription_status ??
+    "inactive";
+  const accountStatus =
+    dashboardData?.cards?.account_status ?? dashboardData?.account_status;
+  const progressSubject = dashboardData?.progress?.subject || "Lessons";
+
   const progressPercent =
-    dashboardData?.progress &&
-    dashboardData.progress.covered + dashboardData.progress.left > 0
-      ? Math.round(
-          (dashboardData.progress.covered /
-            (dashboardData.progress.covered + dashboardData.progress.left)) *
-            100,
-        )
+    totalLessons > 0
+      ? Math.round((lessonsCovered / totalLessons) * 100)
       : 0;
 
-  const donutSubject = dashboardData?.progress?.subject ?? selectedSubject;
+  const donutSubject = progressSubject || selectedSubject;
 
   const donutOptions =
     isLoadingDashboard || !donutSubject
@@ -305,7 +343,7 @@ export function StudentDashboard() {
                     {isLoadingDashboard ? (
                       <Skeleton className="h-8 w-16" />
                     ) : (
-                      (dashboardData?.lessons ?? "—")
+                      getDashboardValue(lessonsCovered)
                     )}
                   </h3>
                 </div>
@@ -333,7 +371,7 @@ export function StudentDashboard() {
                     {isLoadingDashboard ? (
                       <Skeleton className="h-8 w-16" />
                     ) : (
-                      (dashboardData?.subjects ?? "—")
+                      getDashboardValue(totalSubjects)
                     )}
                   </h3>
                 </div>
@@ -345,7 +383,7 @@ export function StudentDashboard() {
           </Card>
         </motion.div>
 
-        {/* Quizzes */}
+        {/* Subscription Status */}
         <motion.div
           whileHover={{ scale: 1.02, y: -2 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
@@ -354,44 +392,42 @@ export function StudentDashboard() {
             <CardContent className="responsive-padding">
               <div className="space-y-2">
                 <p className="text-sm font-medium text-muted-foreground">
-                  Quizzes
-                </p>
-                <div className="flex items-baseline gap-2">
-                  <h3 className="text-xl font-bold sm:text-2xl">
-                    {isLoadingDashboard ? (
-                      <Skeleton className="h-8 w-16" />
-                    ) : (
-                      (dashboardData?.quizzes ?? "—")
-                    )}
-                  </h3>
-                </div>
-              </div>
-              <div className="absolute right-0 top-0 flex size-8 items-center justify-center rounded-bl-xl bg-primary/10">
-                <div className="size-2 rounded-full bg-primary/40"></div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Subscription */}
-        <motion.div
-          whileHover={{ scale: 1.02, y: -2 }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        >
-          <Card className="relative overflow-hidden border-gray-200/50 bg-gradient-to-br from-white to-gray-50/50 dark:border-gray-700/50 dark:from-gray-900 dark:to-gray-800/50">
-            <CardContent className="responsive-padding">
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">
-                  Subscription
+                  Subscription Status
                 </p>
                 <div className="flex items-baseline gap-2">
                   <div className="text-xl font-bold sm:text-2xl">
                     {isLoadingDashboard ? (
                       <Skeleton className="h-8 w-16" />
-                    ) : dashboardData?.subscription_status ? (
-                      getSubscriptionStatusBadge(dashboardData.subscription_status)
                     ) : (
-                      "—"
+                      getSubscriptionStatusBadge(subscriptionStatus)
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="absolute right-0 top-0 flex size-8 items-center justify-center rounded-bl-xl bg-primary/10">
+                <div className="size-2 rounded-full bg-primary/40"></div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Account Status */}
+        <motion.div
+          whileHover={{ scale: 1.02, y: -2 }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        >
+          <Card className="relative overflow-hidden border-gray-200/50 bg-gradient-to-br from-white to-gray-50/50 dark:border-gray-700/50 dark:from-gray-900 dark:to-gray-800/50">
+            <CardContent className="responsive-padding">
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">
+                  Account Status
+                </p>
+                <div className="flex items-baseline gap-2">
+                  <div className="text-xl font-bold sm:text-2xl">
+                    {isLoadingDashboard ? (
+                      <Skeleton className="h-8 w-16" />
+                    ) : (
+                      getAccountStatusBadge(accountStatus)
                     )}
                   </div>
                 </div>
@@ -436,21 +472,19 @@ export function StudentDashboard() {
               stats={[
                 {
                   label: "Subjects",
-                  value: dashboardData?.subjects || "N/A",
+                  value: totalSubjects || "N/A",
                 },
                 {
                   label: "Lessons",
-                  value: dashboardData?.lessons || "N/A",
-                },
-                {
-                  label: "Quizzes",
-                  value: dashboardData?.quizzes || "N/A",
+                  value: lessonsCovered || "N/A",
                 },
                 {
                   label: "Subscription Status",
-                  value: dashboardData?.subscription_status
-                    ? getSubscriptionStatusBadge(dashboardData.subscription_status)
-                    : "N/A",
+                  value: getSubscriptionStatusBadge(subscriptionStatus),
+                },
+                {
+                  label: "Account Status",
+                  value: getAccountStatusBadge(accountStatus),
                 },
               ]}
             />
@@ -458,7 +492,7 @@ export function StudentDashboard() {
         </div>
 
         {/* Progress Card */}
-        {dashboardData?.progress && (
+        {dashboardData && (
           <motion.div variants={itemVariants}>
             <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-blue-50/50 dark:to-blue-950/20">
               <CardHeader>
@@ -469,7 +503,7 @@ export function StudentDashboard() {
                   <div>
                     <CardTitle>Progress Overview</CardTitle>
                     <CardDescription>
-                      Your learning progress in {dashboardData.progress.subject}
+                      Your learning progress
                     </CardDescription>
                   </div>
                 </div>
@@ -479,24 +513,15 @@ export function StudentDashboard() {
                   <div>
                     <div className="mb-2 flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">
-                        {dashboardData.progress.subject} Progress
+                        {progressSubject} Progress
                       </span>
                       <span className="font-medium">
-                        {dashboardData.progress.covered} /{" "}
-                        {dashboardData.progress.covered +
-                          dashboardData.progress.left}
+                        {lessonsCovered} / {totalLessons}
                       </span>
                     </div>
                     <Progress
                       value={
-                        dashboardData.progress.covered +
-                          dashboardData.progress.left >
-                        0
-                          ? (dashboardData.progress.covered /
-                              (dashboardData.progress.covered +
-                                dashboardData.progress.left)) *
-                            100
-                          : 0
+                        progressPercent
                       }
                       className="h-3"
                     />
@@ -507,7 +532,7 @@ export function StudentDashboard() {
                         Covered
                       </div>
                       <div className="text-2xl font-bold text-primary">
-                        {dashboardData.progress.covered}
+                        {lessonsCovered}
                       </div>
                     </div>
                     <div className="rounded-lg border bg-muted/50 p-3">
@@ -515,7 +540,7 @@ export function StudentDashboard() {
                         Remaining
                       </div>
                       <div className="text-2xl font-bold text-muted-foreground">
-                        {dashboardData.progress.left}
+                        {lessonsLeft}
                       </div>
                     </div>
                   </div>
