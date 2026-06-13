@@ -16,7 +16,6 @@ const REQUIRED_FIELDS: Record<string, string[]> = {
     "country",
     "state",
     "city",
-    "address",
     // discipline is conditionally required for SS/SSS classes only
   ],
   guardian: [
@@ -29,7 +28,6 @@ const REQUIRED_FIELDS: Record<string, string[]> = {
     "country",
     "state",
     "city",
-    "address",
     "child_email",
     "child_phone",
   ],
@@ -68,7 +66,6 @@ const FIELD_LABELS: Record<string, string> = {
   country: "Country",
   state: "State",
   city: "City",
-  address: "Address",
   discipline: "Discipline",
   child_email: "Child Email",
   child_phone: "Child Phone",

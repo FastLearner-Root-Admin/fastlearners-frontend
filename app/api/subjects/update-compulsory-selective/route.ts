@@ -31,6 +31,9 @@ export async function POST(req: NextRequest) {
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+    const formData = new URLSearchParams();
+    formData.append("subject", String(subject));
+    formData.append("subject_id", String(subject));
 
     try {
       const upstream = await fetch(
@@ -39,10 +42,10 @@ export async function POST(req: NextRequest) {
           method: "POST",
           headers: {
             Accept: "application/json",
-            "Content-Type": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded",
             Authorization: `Bearer ${auth.token}`,
           },
-          body: JSON.stringify({ subject }),
+          body: formData.toString(),
           cache: "no-store",
           signal: controller.signal,
         },
@@ -71,10 +74,10 @@ export async function POST(req: NextRequest) {
               method: "POST",
               headers: {
                 Accept: "application/json",
-                "Content-Type": "application/json",
+                "Content-Type": "application/x-www-form-urlencoded",
                 Authorization: `Bearer ${auth.token}`,
               },
-              body: JSON.stringify({ subject }),
+              body: formData.toString(),
               cache: "no-store",
             },
           );

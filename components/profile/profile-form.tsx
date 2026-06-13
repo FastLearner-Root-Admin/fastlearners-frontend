@@ -167,6 +167,36 @@ interface ProfileFormProps {
   onSuccess?: (updatedProfile: UserProfile) => void;
 }
 
+function hasProfileValue(value: unknown) {
+  return (
+    value !== null &&
+    value !== undefined &&
+    !(typeof value === "string" && value.trim() === "")
+  );
+}
+
+function showProfileErrorToast(message: string) {
+  const lines = message
+    .split(/\n|;\s*/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (lines.length <= 1) {
+    toast.error(message);
+    return;
+  }
+
+  toast.error("Please review these profile fields", {
+    description: (
+      <ul className="list-disc space-y-1 pl-4">
+        {lines.map((line) => (
+          <li key={line}>{line}</li>
+        ))}
+      </ul>
+    ),
+  });
+}
+
 export function ProfileForm({ onSuccess }: ProfileFormProps) {
   const { user, updateUserProfile } = useAuthStore();
   const { setCurrentClass } = useAcademicContext();
@@ -377,17 +407,14 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
         }
       }
 
-      // Prepare submission data
+      const effectiveClass = data.class || profile?.class || "";
+      const isSeniorClass = effectiveClass.startsWith("SSS");
+
+      // Prepare submission data. Locked profile fields are omitted once set.
       const submitData: any = {
         name: data.name,
         phone: data.phone,
-        username: data.username,
         school: data.school,
-        class: data.class,
-        date_of_birth: data.date_of_birth
-          ? format(data.date_of_birth, "yyyy-MM-dd")
-          : undefined,
-        gender: data.gender,
         country: data.country,
         state: data.state,
         city: data.city,
@@ -397,7 +424,25 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
         parent_phone: data.parent_phone,
       };
 
-      if (data.class && data.class.startsWith("SSS")) {
+      if (!hasProfileValue(profile?.username)) {
+        submitData.username = data.username;
+      }
+
+      if (!hasProfileValue(profile?.class)) {
+        submitData.class = data.class;
+      }
+
+      if (!hasProfileValue(profile?.date_of_birth)) {
+        submitData.date_of_birth = data.date_of_birth
+          ? format(data.date_of_birth, "yyyy-MM-dd")
+          : undefined;
+      }
+
+      if (!hasProfileValue(profile?.gender)) {
+        submitData.gender = data.gender;
+      }
+
+      if (isSeniorClass && !hasProfileValue(profile?.discipline)) {
         submitData.discipline = data.discipline;
       }
 
@@ -410,7 +455,7 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
         submitData as ProfileEditData,
       );
       if (validationErrors.length > 0) {
-        toast.error(validationErrors[0]);
+        showProfileErrorToast(validationErrors.join("\n"));
         setIsSaving(false);
         return;
       }
@@ -442,7 +487,7 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
         }
       }
     } catch (error: any) {
-      toast.error(error.message || "Failed to update profile");
+      showProfileErrorToast(error.message || "Failed to update profile");
     } finally {
       setIsSaving(false);
     }

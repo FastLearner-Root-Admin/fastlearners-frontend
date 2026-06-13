@@ -83,7 +83,7 @@ export async function updateProfile(
     delete payload.discipline;
   }
 
-  const response = await fetch(`${API_BASE}/api/v1/profile/edit`, {
+  const response = await fetch(`${API_BASE}/profile/edit`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -173,6 +173,10 @@ export async function updateCompulsorySelective(
   token: string,
   subjectId: number,
 ): Promise<{ success: boolean; message: string }> {
+  const formData = new URLSearchParams();
+  formData.append("subject", subjectId.toString());
+  formData.append("subject_id", subjectId.toString());
+
   const response = await fetch(
     `${API_BASE}/subjects/update-compulsory-selective`,
     {
@@ -180,9 +184,9 @@ export async function updateCompulsorySelective(
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
-        "Content-Type": "application/json",
+        "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: JSON.stringify({ subject: subjectId }),
+      body: formData.toString(),
     },
   );
 

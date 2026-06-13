@@ -67,6 +67,11 @@ function isFieldLocked(fieldName: string, currentValue: any): boolean {
   return true;
 }
 
+function normalizeFieldValue(value: any): string {
+  if (value === null || value === undefined) return "";
+  return String(value).trim();
+}
+
 /**
  * Validate profile edit data based on role and field editability rules
  */
@@ -125,7 +130,14 @@ export function validateProfileEdit(
     cleanedData.username !== undefined &&
     isFieldLocked("username", currentProfile.username)
   ) {
-    errors.username = ["Username already updated and cannot be changed."];
+    if (
+      normalizeFieldValue(cleanedData.username).toLowerCase() ===
+      normalizeFieldValue(currentProfile.username).toLowerCase()
+    ) {
+      delete cleanedData.username;
+    } else {
+      errors.username = ["Username already updated and cannot be changed."];
+    }
   }
 
   // 5. Check if date_of_birth can be changed (only if current date_of_birth is null)
@@ -133,9 +145,7 @@ export function validateProfileEdit(
     cleanedData.date_of_birth !== undefined &&
     isFieldLocked("date_of_birth", currentProfile.date_of_birth)
   ) {
-    errors.date_of_birth = [
-      "Date of birth already updated. For further enquiries, please contact our support team.",
-    ];
+    delete cleanedData.date_of_birth;
   }
 
   // 6. Check if class can be changed (only if current class is null)
@@ -143,18 +153,32 @@ export function validateProfileEdit(
     cleanedData.class !== undefined &&
     isFieldLocked("class", currentProfile.class)
   ) {
-    errors.class = ["Class already updated. Make a request for class upgrade."];
+    if (normalizeFieldValue(cleanedData.class) === normalizeFieldValue(currentProfile.class)) {
+      delete cleanedData.class;
+    } else {
+      errors.class = ["Class already updated. Make a request for class upgrade."];
+    }
   }
 
   // 7. Validate discipline based on class
-  if (cleanedData.discipline !== undefined) {
+  if (
+    typeof cleanedData.discipline === "string" &&
+    cleanedData.discipline.trim() !== ""
+  ) {
     const classValue = cleanedData.class || currentProfile.class;
 
     // Check if discipline can be changed (only if current discipline is null)
     if (isFieldLocked("discipline", currentProfile.discipline)) {
-      errors.discipline = [
-        "Discipline already updated. For further enquiries, please contact our support team.",
-      ];
+      if (
+        normalizeFieldValue(cleanedData.discipline) ===
+        normalizeFieldValue(currentProfile.discipline)
+      ) {
+        delete cleanedData.discipline;
+      } else {
+        errors.discipline = [
+          "Discipline already updated. For further enquiries, please contact our support team.",
+        ];
+      }
     }
 
     // Discipline only allowed for SSS classes
@@ -180,9 +204,13 @@ export function validateProfileEdit(
     cleanedData.gender !== undefined &&
     isFieldLocked("gender", currentProfile.gender)
   ) {
-    errors.gender = [
-      "Gender already updated. For further enquiries, please contact our support team.",
-    ];
+    if (normalizeFieldValue(cleanedData.gender) === normalizeFieldValue(currentProfile.gender)) {
+      delete cleanedData.gender;
+    } else {
+      errors.gender = [
+        "Gender already updated. For further enquiries, please contact our support team.",
+      ];
+    }
   }
 
   // 9. Role-based field requirements (use roleForValidation which is the effective role)
@@ -224,7 +252,7 @@ export function validateProfileEdit(
       errors.child_phone = ["The child phone field must be a string."];
     }
 
-    // Guardian requires: gender, country, state, city, address (if not already set)
+    // Guardian requires: gender, country, state, city (if not already set)
     if (
       !isFieldLocked("gender", currentProfile.gender) &&
       !cleanedData.gender
@@ -249,13 +277,6 @@ export function validateProfileEdit(
       (typeof cleanedData.city === "string" && cleanedData.city.trim() === "")
     ) {
       errors.city = ["The city field is required."];
-    }
-    if (
-      !cleanedData.address ||
-      (typeof cleanedData.address === "string" &&
-        cleanedData.address.trim() === "")
-    ) {
-      errors.address = ["The address field is required."];
     }
   }
 
@@ -310,13 +331,6 @@ export function validateProfileEdit(
       (typeof cleanedData.city === "string" && cleanedData.city.trim() === "")
     ) {
       errors.city = ["The city field is required."];
-    }
-    if (
-      !cleanedData.address ||
-      (typeof cleanedData.address === "string" &&
-        cleanedData.address.trim() === "")
-    ) {
-      errors.address = ["The address field is required."];
     }
 
     // Discipline required for SSS classes

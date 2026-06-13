@@ -58,6 +58,28 @@ import { useAcademicContext } from "@/components/providers/academic-context";
 // Form validation schema with conditional validation
 type RoleOption = "" | "student" | "guardian";
 
+function showProfileErrorToast(message: string) {
+  const lines = message
+    .split(/\n|;\s*/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (lines.length <= 1) {
+    toast.error(message);
+    return;
+  }
+
+  toast.error("Please review these profile fields", {
+    description: (
+      <ul className="list-disc space-y-1 pl-4">
+        {lines.map((line) => (
+          <li key={line}>{line}</li>
+        ))}
+      </ul>
+    ),
+  });
+}
+
 const createOnboardingSchema = (
   primaryRole: string | null,
   profileUsername: string | null,
@@ -180,14 +202,6 @@ const createOnboardingSchema = (
           });
         }
 
-        if (!data.address || data.address.trim() === "") {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Address is required for students",
-            path: ["address"],
-          });
-        }
-
         // Require school for students
         if (!data.school || data.school.trim() === "") {
           ctx.addIssue({
@@ -292,19 +306,6 @@ const createOnboardingSchema = (
             code: z.ZodIssueCode.custom,
             message: "City is required for guardians",
             path: ["city"],
-          });
-        }
-
-        if (
-          (profile?.address === null ||
-            profile?.address === undefined ||
-            profile?.address === "") &&
-          (!data.address || data.address.trim() === "")
-        ) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Address is required for guardians",
-            path: ["address"],
           });
         }
       }
@@ -444,7 +445,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
         setValue("child_email", profileData.child_email || "");
         setValue("child_phone", profileData.child_phone || "");
       } catch (error: any) {
-        toast.error(error.message || "Failed to load profile");
+        showProfileErrorToast(error.message || "Failed to load profile");
       } finally {
         setIsLoading(false);
       }
@@ -503,7 +504,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
 
           toast.success("Role updated successfully");
         } catch (error: any) {
-          toast.error(error.message || "Failed to update role");
+          showProfileErrorToast(error.message || "Failed to update role");
           isValid = false;
         } finally {
           setIsSubmitting(false);
@@ -566,13 +567,6 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
         ) {
           fieldsToValidate.push("city");
         }
-        if (
-          profile?.address === null ||
-          profile?.address === undefined ||
-          profile?.address === ""
-        ) {
-          fieldsToValidate.push("address");
-        }
       }
 
       isValid = await trigger(fieldsToValidate as (keyof OnboardingFormData)[]);
@@ -619,19 +613,19 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
     try {
       setIsSubmitting(true);
 
-      // Prepare data for submission
+      const hasProfileValue = (value: unknown) =>
+        value !== null &&
+        value !== undefined &&
+        !(typeof value === "string" && value.trim() === "");
+      const effectiveClass = data.class || profile?.class || "";
+      const isSeniorClass = effectiveClass.startsWith("SSS");
+
+      // Prepare data for submission. Locked profile fields are omitted once set.
       const submitData: any = {
         name: data.name,
         phone: data.phone,
-        username: data.username,
         school: data.school,
-        class: data.class,
-        discipline: data.discipline,
         parent_email: data.parent_email,
-        date_of_birth: data.date_of_birth
-          ? format(data.date_of_birth, "yyyy-MM-dd")
-          : undefined,
-        gender: data.gender,
         country: data.country,
         state: data.state,
         city: data.city,
@@ -639,6 +633,28 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
         child_email: data.child_email,
         child_phone: data.child_phone,
       };
+
+      if (!hasProfileValue(profile?.username)) {
+        submitData.username = data.username;
+      }
+
+      if (!hasProfileValue(profile?.class)) {
+        submitData.class = data.class;
+      }
+
+      if (!hasProfileValue(profile?.date_of_birth)) {
+        submitData.date_of_birth = data.date_of_birth
+          ? format(data.date_of_birth, "yyyy-MM-dd")
+          : undefined;
+      }
+
+      if (!hasProfileValue(profile?.gender)) {
+        submitData.gender = data.gender;
+      }
+
+      if (isSeniorClass && !hasProfileValue(profile?.discipline)) {
+        submitData.discipline = data.discipline;
+      }
 
       // Include role if guest
       if (primaryRole === "guest") {
@@ -692,7 +708,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
 
       router.push("/dashboard");
     } catch (error: any) {
-      toast.error(error.message || "Failed to complete profile");
+      showProfileErrorToast(error.message || "Failed to complete profile");
     } finally {
       setIsSubmitting(false);
     }

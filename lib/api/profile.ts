@@ -195,7 +195,7 @@ export const updateProfile = async (
           const msgArray = Array.isArray(messages) ? messages : [messages];
           msgArray.forEach((msg) => {
             if (typeof msg === "string") {
-              errorMessages.push(msg);
+              errorMessages.push(`${field}: ${msg}`);
             }
           });
         });
@@ -205,7 +205,7 @@ export const updateProfile = async (
           throw new Error(
             errorMessages.length === 1
               ? errorMessages[0]
-              : errorMessages.join("; "),
+              : errorMessages.join("\n"),
           );
         }
 

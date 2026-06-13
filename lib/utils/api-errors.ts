@@ -2,7 +2,7 @@ type ApiErrorValue = string | string[] | Record<string, unknown> | unknown[];
 
 function formatErrorValue(value: ApiErrorValue): string {
   if (Array.isArray(value)) {
-    return value.map((item) => String(item)).join(", ");
+    return value.map((item) => String(item)).join("\n");
   }
 
   if (value && typeof value === "object") {
@@ -11,7 +11,7 @@ function formatErrorValue(value: ApiErrorValue): string {
         ([key, nestedValue]) =>
           `${key}: ${formatErrorValue(nestedValue as ApiErrorValue)}`,
       )
-      .join("; ");
+      .join("\n");
   }
 
   return String(value);
@@ -47,10 +47,10 @@ export function formatApiErrorMessage(
             `${field}: ${formatErrorValue(value as ApiErrorValue)}`,
         )
         .filter(Boolean)
-        .join("; ");
+        .join("\n");
 
   if (!errorsText) return message;
   if (message.toLowerCase() === errorsText.toLowerCase()) return message;
 
-  return `${message}: ${errorsText}`;
+  return `${message}\n${errorsText}`;
 }

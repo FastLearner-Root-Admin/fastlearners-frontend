@@ -49,6 +49,25 @@ async function forward(req: NextRequest, path: string[]) {
       cache: "no-store",
     });
     const data = await resp.json().catch(() => ({}));
+
+    if (
+      req.method === "GET" &&
+      path.join("/") === "packages" &&
+      resp.status === 404 &&
+      data?.message === "No package was found!"
+    ) {
+      return NextResponse.json(
+        {
+          type: "success",
+          success: true,
+          message: "No packages available",
+          content: { packages: [] },
+          code: 200,
+        },
+        { status: 200 },
+      );
+    }
+
     return NextResponse.json(data, { status: resp.status });
   } catch (e: any) {
     return NextResponse.json(
