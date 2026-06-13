@@ -37,7 +37,7 @@ export default function OnboardingPage() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto space-y-6 px-4 py-6 sm:px-6 sm:py-8">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">
           Welcome, {user.name || user.email?.split("@")[0] || "there"}!

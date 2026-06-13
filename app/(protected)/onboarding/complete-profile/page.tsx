@@ -40,7 +40,7 @@ export default function CompleteProfilePage() {
 
   if (authLoading || !user) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center">
+      <div className="container mx-auto flex min-h-[400px] items-center justify-center px-4 py-6 sm:px-6 sm:py-8">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="size-8 animate-spin text-primary" />
           <span className="text-sm text-muted-foreground">Loading...</span>
@@ -50,7 +50,7 @@ export default function CompleteProfilePage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto space-y-6 px-4 py-6 sm:px-6 sm:py-8">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button
