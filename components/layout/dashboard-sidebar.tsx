@@ -81,44 +81,46 @@ export function DashboardSidebar({ links }: DashboardSidebarProps) {
     setIsSidebarExpanded(!isTablet);
   }, [isTablet]);
 
+  const sidebarWidthClass = isSidebarExpanded
+    ? "w-sidebar-expanded-sm lg:w-sidebar-expanded-lg xl:w-sidebar-expanded-xl"
+    : "w-sidebar-collapsed";
+
   return (
     <TooltipProvider delayDuration={0}>
-      <div className="sticky top-0 h-full">
-        <ScrollArea className="h-full overflow-y-auto border-r">
-          <aside
-            className={cn(
-              isSidebarExpanded
-                ? "w-sidebar-expanded-sm lg:w-sidebar-expanded-lg xl:w-sidebar-expanded-xl"
-                : "w-sidebar-collapsed",
-              "hidden h-screen md:block",
-            )}
+      <div
+        className={cn(
+          sidebarWidthClass,
+          "hidden shrink-0 transition-[width] duration-200 ease-linear md:block",
+        )}
+        aria-hidden="true"
+      />
+      <aside
+        className={cn(
+          sidebarWidthClass,
+          "fixed inset-y-0 left-0 z-30 hidden border-r bg-background md:flex md:flex-col",
+          "transition-[width] duration-200 ease-linear",
+        )}
+      >
+        <div className="flex h-14 shrink-0 items-center p-component-sm lg:h-[60px] lg:p-component-md">
+          {isSidebarExpanded ? <ProjectSwitcher /> : null}
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="mobile-touch-target ml-auto size-9 lg:size-8"
+            onClick={toggleSidebar}
           >
-            <div className="flex h-full max-h-screen flex-1 flex-col gap-2">
-              <div className="flex h-14 items-center p-component-sm lg:h-[60px] lg:p-component-md">
-                {isSidebarExpanded ? <ProjectSwitcher /> : null}
+            {isSidebarExpanded ? (
+              <PanelLeftClose size={18} className="stroke-muted-foreground" />
+            ) : (
+              <PanelRightClose size={18} className="stroke-muted-foreground" />
+            )}
+            <span className="sr-only">Toggle Sidebar</span>
+          </Button>
+        </div>
 
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="mobile-touch-target ml-auto size-9 lg:size-8"
-                  onClick={toggleSidebar}
-                >
-                  {isSidebarExpanded ? (
-                    <PanelLeftClose
-                      size={18}
-                      className="stroke-muted-foreground"
-                    />
-                  ) : (
-                    <PanelRightClose
-                      size={18}
-                      className="stroke-muted-foreground"
-                    />
-                  )}
-                  <span className="sr-only">Toggle Sidebar</span>
-                </Button>
-              </div>
-
-              <nav className="flex flex-1 flex-col gap-component-lg px-component-md pt-component-md">
+        <ScrollArea className="min-h-0 flex-1">
+          <nav className="flex flex-col gap-component-lg p-component-md">
                 {links.map((section) => {
                   if (section.items.length === 0) return null;
                   return (
@@ -203,8 +205,9 @@ export function DashboardSidebar({ links }: DashboardSidebarProps) {
                   );
                 })}
               </nav>
+        </ScrollArea>
 
-              <div className="mb-control-lg xl:p-4">
+        <div className="shrink-0 border-t border-border/40 p-component-sm xl:p-4">
                 {isSidebarExpanded ? (
                   isGuest ? (
                     <UpgradeCard />
@@ -271,11 +274,8 @@ export function DashboardSidebar({ links }: DashboardSidebarProps) {
                     </div>
                   </div>
                 )} */}
-              </div>
-            </div>
-          </aside>
-        </ScrollArea>
-      </div>
+        </div>
+      </aside>
     </TooltipProvider>
   );
 }

@@ -32,6 +32,9 @@ export interface UpdateData {
   country?: string;
   state?: string;
   city?: string;
+  address?: string;
+  parent_email?: string;
+  parent_phone?: string;
   child_email?: string;
   child_phone?: string;
   [key: string]: any;
@@ -247,11 +250,35 @@ export function validateProfileEdit(
     ) {
       errors.city = ["The city field is required."];
     }
+    if (
+      !cleanedData.address ||
+      (typeof cleanedData.address === "string" &&
+        cleanedData.address.trim() === "")
+    ) {
+      errors.address = ["The address field is required."];
+    }
   }
 
   if (roleForValidation === "student") {
-    // Student-specific: school, class, discipline (if SSS) are required
+    // Student-specific: parent email, school, class, discipline (if SSS), and location are required
     // Note: Except for students, school, class and discipline are NOT required for other roles
+    const parentEmail = cleanedData.parent_email;
+    if (
+      !parentEmail ||
+      (typeof parentEmail === "string" && parentEmail.trim() === "")
+    ) {
+      errors.parent_email = ["The parent email is required."];
+    } else if (typeof parentEmail === "string") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(parentEmail.trim())) {
+        errors.parent_email = [
+          "The parent email field must be a valid email address.",
+        ];
+      } else {
+        cleanedData.parent_email = parentEmail.trim();
+      }
+    }
+
     if (
       !cleanedData.school ||
       (typeof cleanedData.school === "string" &&
@@ -264,6 +291,32 @@ export function validateProfileEdit(
       (typeof cleanedData.class === "string" && cleanedData.class.trim() === "")
     ) {
       errors.class = ["The class field is required."];
+    }
+    if (
+      !cleanedData.country ||
+      (typeof cleanedData.country === "string" &&
+        cleanedData.country.trim() === "")
+    ) {
+      errors.country = ["The country field is required."];
+    }
+    if (
+      !cleanedData.state ||
+      (typeof cleanedData.state === "string" && cleanedData.state.trim() === "")
+    ) {
+      errors.state = ["The state field is required."];
+    }
+    if (
+      !cleanedData.city ||
+      (typeof cleanedData.city === "string" && cleanedData.city.trim() === "")
+    ) {
+      errors.city = ["The city field is required."];
+    }
+    if (
+      !cleanedData.address ||
+      (typeof cleanedData.address === "string" &&
+        cleanedData.address.trim() === "")
+    ) {
+      errors.address = ["The address field is required."];
     }
 
     // Discipline required for SSS classes

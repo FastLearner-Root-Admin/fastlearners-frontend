@@ -25,6 +25,8 @@ export interface User {
   city: string | null;
   address: string | null;
   gender: string | null;
+  parent_email?: string | null;
+  parent_phone?: string | null;
   image: string | null;
   avatar?: string | null;
   status: "active" | "inactive" | "suspended";
@@ -104,8 +106,11 @@ export interface ProfileUpdateData {
   country?: string;
   state?: string;
   city?: string;
+  address?: string;
   gender?: string;
   role?: string;
+  parent_email?: string;
+  parent_phone?: string;
 
   // Guardian-specific fields
   child_email?: string;

@@ -80,9 +80,15 @@ const createOnboardingSchema = (
       country: z.string().optional(),
       state: z.string().optional(),
       city: z.string().optional(),
+      address: z.string().optional(),
       school: z.string().optional(),
       class: z.string().optional(),
       discipline: z.string().optional(),
+      parent_email: z
+        .string()
+        .email("Please enter a valid parent email address")
+        .optional()
+        .or(z.literal("")),
       child_email: z.string().email().optional().or(z.literal("")),
       child_phone: z.string().optional().or(z.literal("")),
     })
@@ -142,6 +148,46 @@ const createOnboardingSchema = (
 
       // Student-specific requirements
       if (effectiveRole === "student") {
+        if (!data.parent_email || data.parent_email.trim() === "") {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Parent email is required",
+            path: ["parent_email"],
+          });
+        }
+
+        if (!data.country || data.country.trim() === "") {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Country is required for students",
+            path: ["country"],
+          });
+        }
+
+        if (!data.state || data.state.trim() === "") {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "State is required for students",
+            path: ["state"],
+          });
+        }
+
+        if (!data.city || data.city.trim() === "") {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "City is required for students",
+            path: ["city"],
+          });
+        }
+
+        if (!data.address || data.address.trim() === "") {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Address is required for students",
+            path: ["address"],
+          });
+        }
+
         // Require school for students
         if (!data.school || data.school.trim() === "") {
           ctx.addIssue({
@@ -246,6 +292,19 @@ const createOnboardingSchema = (
             code: z.ZodIssueCode.custom,
             message: "City is required for guardians",
             path: ["city"],
+          });
+        }
+
+        if (
+          (profile?.address === null ||
+            profile?.address === undefined ||
+            profile?.address === "") &&
+          (!data.address || data.address.trim() === "")
+        ) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Address is required for guardians",
+            path: ["address"],
           });
         }
       }
@@ -375,11 +434,13 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
         setValue("school", profileData.school || "");
         setValue("class", profileData.class || "");
         setValue("discipline", profileData.discipline || "");
+        setValue("parent_email", profileData.parent_email || "");
         setValue("date_of_birth", parseProfileDate(profileData.date_of_birth));
         setValue("gender", genderValue);
         setValue("country", profileData.country || "");
         setValue("state", profileData.state || "");
         setValue("city", profileData.city || "");
+        setValue("address", profileData.address || "");
         setValue("child_email", profileData.child_email || "");
         setValue("child_phone", profileData.child_phone || "");
       } catch (error: any) {
@@ -473,8 +534,8 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
         fieldsToValidate.push("gender");
       }
 
-      // For guardians, require location fields when not present
-      if (effectiveRole === "guardian") {
+      // For students and guardians, require location fields when not present
+      if (effectiveRole === "student" || effectiveRole === "guardian") {
         if (
           profile?.gender === null ||
           profile?.gender === undefined ||
@@ -505,12 +566,20 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
         ) {
           fieldsToValidate.push("city");
         }
+        if (
+          profile?.address === null ||
+          profile?.address === undefined ||
+          profile?.address === ""
+        ) {
+          fieldsToValidate.push("address");
+        }
       }
 
       isValid = await trigger(fieldsToValidate as (keyof OnboardingFormData)[]);
     } else if (currentStep === 4) {
       if (effectiveRole === "student") {
         isValid = await trigger([
+          "parent_email",
           "school",
           "class",
         ] as (keyof OnboardingFormData)[]);
@@ -558,6 +627,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
         school: data.school,
         class: data.class,
         discipline: data.discipline,
+        parent_email: data.parent_email,
         date_of_birth: data.date_of_birth
           ? format(data.date_of_birth, "yyyy-MM-dd")
           : undefined,
@@ -565,6 +635,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
         country: data.country,
         state: data.state,
         city: data.city,
+        address: data.address,
         child_email: data.child_email,
         child_phone: data.child_phone,
       };
@@ -590,10 +661,12 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
         school: updatedProfile.school,
         class: updatedProfile.class,
         discipline: updatedProfile.discipline,
+        parent_email: updatedProfile.parent_email,
         date_of_birth: updatedProfile.date_of_birth,
         country: updatedProfile.country,
         state: updatedProfile.state,
         city: updatedProfile.city,
+        address: updatedProfile.address,
         gender: updatedProfile.gender,
         child_email: updatedProfile.child_email,
         child_phone: updatedProfile.child_phone,
@@ -945,6 +1018,20 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                       </p>
                     )}
                   </div>
+
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="address">Address</Label>
+                    <Input
+                      id="address"
+                      {...register("address")}
+                      placeholder="Enter your address"
+                    />
+                    {errors.address && (
+                      <p className="text-sm text-destructive">
+                        {errors.address.message}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -961,6 +1048,21 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                 {(selectedRole === "student" || primaryRole === "student") && (
                   <>
                     <div className="grid gap-4 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="parent_email">Parent Email *</Label>
+                        <Input
+                          id="parent_email"
+                          type="email"
+                          {...register("parent_email")}
+                          placeholder="parent@example.com"
+                        />
+                        {errors.parent_email && (
+                          <p className="text-sm text-destructive">
+                            {errors.parent_email.message}
+                          </p>
+                        )}
+                      </div>
+
                       <div className="space-y-2">
                         <Label htmlFor="school">School</Label>
                         <Input
@@ -1156,6 +1258,8 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                     <br />
                     Location: {watch("country")}, {watch("state")},{" "}
                     {watch("city")}
+                    <br />
+                    Address: {watch("address")}
                   </p>
                 </div>
 
@@ -1163,6 +1267,8 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                   <div className="space-y-2">
                     <h4 className="font-medium">Student Information</h4>
                     <p className="text-sm text-muted-foreground">
+                      Parent Email: {watch("parent_email")}
+                      <br />
                       School: {watch("school")}
                       <br />
                       Class: {watch("class")}
