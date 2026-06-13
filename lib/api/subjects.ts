@@ -9,6 +9,7 @@ import {
   type SubjectsResponse,
   type UpdateResponse,
 } from "@/lib/types/subjects";
+import { formatApiErrorMessage } from "@/lib/utils/api-errors";
 
 import { BASE_API_URL as API_BASE } from "./client";
 
@@ -103,10 +104,15 @@ export async function updateProfile(
           return `${field}: ${msgArray.join(", ")}`;
         })
         .join("; ");
-      throw new Error(errorMessages || error.message || "Validation failed");
+      throw new Error(
+        formatApiErrorMessage(
+          { message: error.message || errorMessages, errors: error.errors },
+          "Validation failed",
+        ),
+      );
     }
 
-    throw new Error(error.message || "Failed to update profile");
+    throw new Error(formatApiErrorMessage(error, "Failed to update profile"));
   }
 
   const result = await response.json();
@@ -182,7 +188,9 @@ export async function updateCompulsorySelective(
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message || "Failed to update compulsory selective");
+    throw new Error(
+      formatApiErrorMessage(error, "Failed to update compulsory selective"),
+    );
   }
 
   return {
@@ -191,7 +199,7 @@ export async function updateCompulsorySelective(
   };
 }
 
-// Update selective subjects (JSS: 4, SSS: 5) - using FormData
+// Update selective subjects (JSS: 2, SSS: 4) - using FormData
 export async function updateSelectiveSubjects(
   token: string,
   subjectIds: number[],
@@ -212,7 +220,9 @@ export async function updateSelectiveSubjects(
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message || "Failed to update selective subjects");
+    throw new Error(
+      formatApiErrorMessage(error, "Failed to update selective subjects"),
+    );
   }
 
   return { success: true, message: "Selective subjects updated successfully" };
@@ -262,7 +272,7 @@ export async function getStudentSubjects(): Promise<SubjectsResponse> {
     if (!res.ok || !data?.success) {
       return {
         success: false,
-        message: data?.message || "Failed to fetch subjects",
+        message: formatApiErrorMessage(data, "Failed to fetch subjects"),
         content: null,
         code: res.status,
       };
@@ -316,7 +326,10 @@ export async function updateCompulsorySelectiveClient(
     if (!res.ok) {
       return {
         success: false,
-        message: data.message || "Failed to update compulsory selective",
+        message: formatApiErrorMessage(
+          data,
+          "Failed to update compulsory selective",
+        ),
         content: null,
         code: res.status,
         errors: data.errors,
@@ -403,7 +416,10 @@ export async function updateSelectiveSubjectsClient(
       }
       return {
         success: false,
-        message: data.message || "Failed to update selective subjects",
+        message: formatApiErrorMessage(
+          data,
+          "Failed to update selective subjects",
+        ),
         content: null,
         code: res.status,
         errors: data.errors,

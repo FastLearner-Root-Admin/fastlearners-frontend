@@ -48,7 +48,7 @@ export interface UpdateResponse {
   message: string;
   content: null;
   code: number;
-  errors?: Record<string, string[]>;
+  errors?: Record<string, string | string[]>;
 }
 
 export interface ProfileData {

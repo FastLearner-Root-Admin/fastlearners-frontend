@@ -17,6 +17,7 @@ import { toast } from "sonner";
 
 import { getStudentSubjects } from "@/lib/api/subjects";
 import type { SubjectsContent } from "@/lib/types/subjects";
+import { formatApiErrorMessage } from "@/lib/utils/api-errors";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -54,7 +55,7 @@ export function SimpleSubjectSelector({
   const { user } = useAuthStore();
   const derivedClass = (profileClass ?? user?.class ?? "").toUpperCase();
   const isJSS = derivedClass.startsWith("JSS");
-  const requiredSelectiveCount = 4; // Always 4 according to docs
+  const requiredSelectiveCount = isJSS ? 2 : 4;
 
   const [isLoading, setIsLoading] = useState(!initialData);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -215,7 +216,10 @@ export function SimpleSubjectSelector({
 
       if (!response.ok) {
         throw new Error(
-          data.message || "Failed to update compulsory selective subject",
+          formatApiErrorMessage(
+            data,
+            "Failed to update compulsory selective subject",
+          ),
         );
       }
 
@@ -263,7 +267,9 @@ export function SimpleSubjectSelector({
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to update selective subjects");
+        throw new Error(
+          formatApiErrorMessage(data, "Failed to update selective subjects"),
+        );
       }
 
       toast.success("Selective subjects saved successfully!");

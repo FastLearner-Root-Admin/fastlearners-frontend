@@ -8,8 +8,8 @@ export const subjectSetupSchema = z.object({
   compulsorySelective: z.number().nullable(),
   electiveIds: z
     .array(z.number())
-    .min(4, "Select at least 4 electives")
-    .max(6, "Select at most 6 electives"),
+    .min(2, "Select at least 2 electives")
+    .max(4, "Select at most 4 electives"),
 });
 
 export type SubjectSetupFormData = z.infer<typeof subjectSetupSchema>;
@@ -20,7 +20,7 @@ export const jssSubjectSetupSchema = subjectSetupSchema
     compulsorySelective: z
       .number()
       .min(1, "Compulsory selective subject is required"),
-    electiveIds: z.array(z.number()).length(4, "Select exactly 4 electives"),
+    electiveIds: z.array(z.number()).length(2, "Select exactly 2 electives"),
   })
   .refine(
     (data) => {
@@ -32,11 +32,11 @@ export const jssSubjectSetupSchema = subjectSetupSchema
   );
 
 // Schema for SSS (no compulsory selective)
-// Note: Nigerian curriculum requires 6 electives for SSS (total 9 subjects: 3 core + 6 electives)
+// Note: JSS requires 2 electives, while SSS requires 4 electives.
 export const sssSubjectSetupSchema = subjectSetupSchema
   .extend({
     compulsorySelective: z.number().nullable(),
-    electiveIds: z.array(z.number()).length(6, "Select exactly 6 electives"),
+    electiveIds: z.array(z.number()).length(4, "Select exactly 4 electives"),
   })
   .refine(
     (data) => {

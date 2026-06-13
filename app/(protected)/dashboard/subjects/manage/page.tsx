@@ -16,6 +16,7 @@ import { toast } from "sonner";
 
 import { getStudentSubjects } from "@/lib/api/subjects";
 import type { SubjectsContent } from "@/lib/types/subjects";
+import { formatApiErrorMessage } from "@/lib/utils/api-errors";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -52,7 +53,8 @@ export default function ManageSubjectsPage() {
   const [showCompulsoryConfirm, setShowCompulsoryConfirm] = useState(false);
   const [showSelectiveConfirm, setShowSelectiveConfirm] = useState(false);
 
-  const requiredSelectiveCount = 4;
+  const profileClass = (user?.class ?? "").toUpperCase();
+  const requiredSelectiveCount = profileClass.startsWith("JSS") ? 2 : 4;
 
   // Determine if compulsory selective exists (JSS classes only have this)
   const hasCompulsorySelective =
@@ -164,7 +166,10 @@ export default function ManageSubjectsPage() {
 
       if (!response.ok) {
         throw new Error(
-          data.message || "Failed to update compulsory selective subject",
+          formatApiErrorMessage(
+            data,
+            "Failed to update compulsory selective subject",
+          ),
         );
       }
 
@@ -211,7 +216,9 @@ export default function ManageSubjectsPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to update selective subjects");
+        throw new Error(
+          formatApiErrorMessage(data, "Failed to update selective subjects"),
+        );
       }
 
       toast.success("Selective subjects updated successfully!");

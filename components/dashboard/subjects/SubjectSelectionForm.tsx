@@ -17,6 +17,7 @@ import {
 } from "@/lib/api/subjects";
 import type { SubjectItem } from "@/lib/types/subjects";
 import { cn } from "@/lib/utils";
+import { formatApiErrorMessage } from "@/lib/utils/api-errors";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -74,8 +75,12 @@ export function SubjectSelectionForm({
           credentials: "include",
         });
 
-        if (!response.ok) throw new Error("Failed to fetch subjects");
         const result = await response.json();
+        if (!response.ok) {
+          throw new Error(
+            formatApiErrorMessage(result, "Failed to fetch subjects"),
+          );
+        }
         data = result.content;
       }
 
@@ -136,7 +141,7 @@ export function SubjectSelectionForm({
         if (!response.ok) {
           const error = await response.json();
           throw new Error(
-            error.message || "Failed to update compulsory subject",
+            formatApiErrorMessage(error, "Failed to update compulsory subject"),
           );
         }
       }
@@ -179,7 +184,7 @@ export function SubjectSelectionForm({
         if (!response.ok) {
           const error = await response.json();
           throw new Error(
-            error.message || "Failed to update elective subjects",
+            formatApiErrorMessage(error, "Failed to update elective subjects"),
           );
         }
       }

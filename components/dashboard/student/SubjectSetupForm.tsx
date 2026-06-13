@@ -30,6 +30,7 @@ import {
   updateSelectiveSubjectsClient,
 } from "@/lib/api/subjects";
 import type { Subject as ApiSubject } from "@/lib/types/subjects";
+import { formatApiErrorMessage } from "@/lib/utils/api-errors";
 import {
   jssSubjectSetupSchema,
   sssSubjectSetupSchema,
@@ -128,6 +129,9 @@ export function SubjectSetupForm({
     message: string;
     retry?: () => void;
   } | null>(null);
+
+  const getRequiredElectiveCount = (isJssClass: boolean) =>
+    isJssClass ? 2 : 4;
 
   // Convert initial term ID from config format to UI format if needed
   const initialTermId = useMemo(() => {
@@ -363,16 +367,15 @@ export function SubjectSetupForm({
 
     // Final validation: ensure exact totals (core + electives)
     const isJSS = classLevel === "JSS";
+    const requiredElectives = getRequiredElectiveCount(isJSS);
     const totalSelected = coreSubjectIds.length + data.electiveIds.length;
-    const expectedTotal = isJSS
-      ? coreApiSubjects.length + 4 // JSS: all core + 4 electives
-      : coreApiSubjects.length + 6; // SSS: all core (typically 3) + 6 electives
+    const expectedTotal = coreApiSubjects.length + requiredElectives;
 
     if (totalSelected !== expectedTotal) {
       setIsSubmitting(false);
       toast({
         title: "Invalid Selection",
-        description: `You must select exactly ${expectedTotal} subjects (${coreApiSubjects.length} core + ${isJSS ? 4 : 6} electives). Currently selected: ${totalSelected}.`,
+        description: `You must select exactly ${expectedTotal} subjects (${coreApiSubjects.length} core + ${requiredElectives} electives). Currently selected: ${totalSelected}.`,
         variant: "destructive",
       });
       return;
@@ -387,7 +390,10 @@ export function SubjectSetupForm({
           );
           if (!result.success) {
             throw new Error(
-              result.message || "Failed to update compulsory selective",
+              formatApiErrorMessage(
+                result,
+                "Failed to update compulsory selective",
+              ),
             );
           }
           return result;
@@ -437,12 +443,10 @@ export function SubjectSetupForm({
           );
           if (!result.success) {
             // Create a detailed error with validation information
-            const errorMessage =
-              result.message || "Failed to update selective subjects";
-            const errorDetails = result.errors
-              ? ` Validation errors: ${JSON.stringify(result.errors)}`
-              : "";
-            const fullMessage = `${errorMessage}${errorDetails} (Code: ${result.code})`;
+            const fullMessage = `${formatApiErrorMessage(
+              result,
+              "Failed to update selective subjects",
+            )} (Code: ${result.code})`;
 
             // Log for debugging
             if (process.env.NEXT_PUBLIC_DEBUG_AUTH === "true") {
@@ -609,11 +613,11 @@ export function SubjectSetupForm({
 
   const progress = (currentStep / STEPS.length) * 100;
   // Derive requiredElectiveCount from the same logic as the schema
-  // Note: Nigerian curriculum requires 6 electives for SSS (total 9 subjects: 3 core + 6 electives)
+  // JSS requires 2 electives; SSS requires 4 electives.
   const requiredElectiveCount = useMemo(() => {
-    if (!classId) return 4; // Default to JSS
+    if (!classId) return 2; // Default to JSS
     const isJSS = classId.toLowerCase().includes("jss");
-    return isJSS ? 4 : 6;
+    return getRequiredElectiveCount(isJSS);
   }, [classId]);
 
   // Note: isConfigSubjectSelected and isConfigSubjectDisabled removed as we use API subjects directly
@@ -623,15 +627,13 @@ export function SubjectSetupForm({
   const expectedTotal = useMemo(() => {
     if (!classId) return 0;
     const isJSS = classId.toLowerCase().includes("jss");
-    return isJSS
-      ? coreApiSubjects.length + 4 // JSS: all core + 4 electives
-      : coreApiSubjects.length + 6; // SSS: all core (typically 3) + 6 electives
+    return coreApiSubjects.length + getRequiredElectiveCount(isJSS);
   }, [classId, coreApiSubjects.length]);
   const requiredCoreCount = coreApiSubjects.length;
   const requiredElectiveCountForTracker = useMemo(() => {
-    if (!classId) return 4;
+    if (!classId) return 2;
     const isJSS = classId.toLowerCase().includes("jss");
-    return isJSS ? 4 : 6;
+    return getRequiredElectiveCount(isJSS);
   }, [classId]);
 
   return (

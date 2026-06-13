@@ -76,5 +76,5 @@ export function getClassCategory(className: string): "jss" | "sss" | null {
 
 export function getSelectiveRequirement(className: string): number {
   const category = getClassCategory(className);
-  return category === "jss" ? 4 : 5; // JSS: 4, SSS: 5
+  return category === "jss" ? 2 : 4; // JSS: 2, SSS: 4
 }
