@@ -559,7 +559,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
         class: data.class,
         discipline: data.discipline,
         date_of_birth: data.date_of_birth
-          ? format(data.date_of_birth, "dd/MM/yyyy")
+          ? format(data.date_of_birth, "yyyy-MM-dd")
           : undefined,
         gender: data.gender,
         country: data.country,

@@ -385,7 +385,7 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
         school: data.school,
         class: data.class,
         date_of_birth: data.date_of_birth
-          ? format(data.date_of_birth, "dd/MM/yyyy")
+          ? format(data.date_of_birth, "yyyy-MM-dd")
           : undefined,
         gender: data.gender,
         country: data.country,

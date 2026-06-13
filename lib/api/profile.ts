@@ -412,8 +412,11 @@ export const validateProfileData = (data: ProfileEditData): string[] => {
     errors.push("Class must be JSS1-JSS3 or SSS1-SSS3");
   }
 
-  if (data.date_of_birth && !/^\d{2}\/\d{2}\/\d{4}$/.test(data.date_of_birth)) {
-    errors.push("Date of birth must be in DD/MM/YYYY format");
+  if (
+    data.date_of_birth &&
+    !/^(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2})$/.test(data.date_of_birth)
+  ) {
+    errors.push("Date of birth must be in DD/MM/YYYY or YYYY-MM-DD format");
   }
 
   if (data.gender && !["male", "female"].includes(data.gender)) {
