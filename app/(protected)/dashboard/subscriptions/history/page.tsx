@@ -198,14 +198,9 @@ export default function SubscriptionHistoryPage() {
 
       {!subscriptions || subscriptions.length === 0 ? (
         <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center p-12 text-center">
-            <History className="mb-4 size-12 text-muted-foreground" />
-            <h3 className="text-lg font-medium">
-              No subscription history found
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              You do not have any active or past subscriptions.
-            </p>
+          <CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+            <History className="mb-4 size-12" />
+            <p className="text-lg font-medium">No subscription history found</p>
           </CardContent>
         </Card>
       ) : (

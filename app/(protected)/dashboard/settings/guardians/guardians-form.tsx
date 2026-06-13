@@ -13,6 +13,7 @@ import { GuardianRequestItem } from "@/lib/types/guardian";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { showApiToast } from "@/lib/utils/api-toast";
 
@@ -88,14 +89,12 @@ export function GuardiansForm() {
 
   if (history.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-xl border border-dashed p-12 text-center">
-        <Clock className="mb-4 size-12 text-muted-foreground/50" />
-        <h3 className="text-lg font-medium">No guardian requests yet</h3>
-        <p className="text-sm text-muted-foreground">
-          When a guardian invites you to monitor your progress, it will appear
-          here.
-        </p>
-      </div>
+      <Card className="border-dashed">
+        <CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+          <Clock className="mb-4 size-12" />
+          <p className="text-lg font-medium">No guardian requests yet</p>
+        </CardContent>
+      </Card>
     );
   }
 
