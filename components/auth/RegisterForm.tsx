@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { authApi } from "@/lib/api/auth";
+import { identifyUser, trackEvent } from "@/lib/analytics/posthog";
+import { startGoogleAuth } from "@/lib/auth/google";
 import { cn } from "@/lib/utils";
 import { registerSchema } from "@/lib/validations/auth";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -47,6 +49,14 @@ export function RegisterForm({
         toast.success("Registration successful!", {
           description: "Please check your email for verification.",
         });
+        identifyUser(data.email, {
+          email: data.email,
+          name: null,
+          role: null,
+          class: null,
+          auth_provider: "email",
+        });
+        trackEvent("user_signed_up", { method: "email" });
 
         // Navigate to verify email page with email in URL params
         router.push(
@@ -132,19 +142,8 @@ export function RegisterForm({
           "You will be redirected back to complete your registration.",
       });
 
-      // Construct Google OAuth URL with our frontend callback
-      const googleOAuthUrl =
-        "https://accounts.google.com/o/oauth2/auth?" +
-        new URLSearchParams({
-          client_id:
-            "721571159309-mta5k0ge8ghrl4u5oenvuc54p6u77e67.apps.googleusercontent.com",
-          redirect_uri: `${window.location.origin}/auth/google/callback`,
-          scope: "openid profile email",
-          response_type: "code",
-        }).toString();
-
       setTimeout(() => {
-        window.location.href = googleOAuthUrl;
+        startGoogleAuth();
       }, 500);
     } catch (err: any) {
       console.error("Google sign-up error:", err);

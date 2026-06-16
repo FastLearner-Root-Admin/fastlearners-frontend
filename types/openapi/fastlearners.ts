@@ -187,12 +187,35 @@ export interface paths {
       };
     };
   };
-  "/api/v1/google/redirect": {
+  "/api/v1/google/auth": {
     /** Login/Register with Google */
     post: {
+      requestBody: {
+        content: {
+          "application/json": {
+            id_token: string;
+          };
+        };
+      };
       responses: {
         /** @description Success */
         200: {
+          content: {
+            "application/json": components["schemas"]["ApiResponse"] & {
+              content?: components["schemas"]["AuthTokens"];
+            };
+          };
+        };
+        /** @description Validation error */
+        422: {
+          content: never;
+        };
+        /** @description Google email not verified */
+        403: {
+          content: never;
+        };
+        /** @description Invalid token issuer */
+        401: {
           content: never;
         };
       };

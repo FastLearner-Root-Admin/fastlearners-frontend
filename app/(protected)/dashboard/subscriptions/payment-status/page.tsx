@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { getPaymentStatus } from "@/lib/api/subscription";
+import { trackEvent } from "@/lib/analytics/posthog";
 import { PaymentStatusContent } from "@/lib/types/subscription";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,16 @@ function PaymentStatusInner() {
         const response = await getPaymentStatus(reference as string);
         if (response.success && response.content) {
           setData(response.content);
+          const transaction = response.content.transaction_details;
+          if (transaction?.status?.toLowerCase() === "success") {
+            trackEvent("subscription_purchased", {
+              reference,
+              plan: transaction.package,
+              amount: transaction.amount,
+              payment_amount: transaction.payment_amount,
+              coupon: transaction.coupon || null,
+            });
+          }
         } else {
           setError(response.message || "Failed to verify payment status.");
         }

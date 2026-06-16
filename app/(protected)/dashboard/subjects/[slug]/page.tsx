@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { getSubjectScore, getSubjectsWithSlugs } from "@/lib/api/lessons";
+import { trackEvent } from "@/lib/analytics/posthog";
 import type { TopicItem, TopicsByTerm } from "@/lib/types/lessons";
 import {
   Accordion,
@@ -69,6 +70,10 @@ export default function SubjectDetailPage() {
           );
           if (subject) {
             setSubjectId(subject.id);
+            trackEvent("subject_opened", {
+              subject_id: subject.id,
+              subject_name: subject.name,
+            });
           }
         }
       } catch (error) {
@@ -162,9 +167,13 @@ export default function SubjectDetailPage() {
     handleSlugOrId();
   }, [subjectSlug, router]);
 
-  const handleTopicClick = (topicSlug: string) => {
+  const handleTopicClick = (topic: TopicItem) => {
+    trackEvent("topic_started", {
+      topic_id: topic.id,
+      topic: topic.topic,
+    });
     // Navigate directly to the lesson page
-    router.push(`/dashboard/lessons/${subjectSlug}/${topicSlug}`);
+    router.push(`/dashboard/lessons/${subjectSlug}/${topic.slug}`);
   };
 
   if (isLoading) {
@@ -298,7 +307,7 @@ export default function SubjectDetailPage() {
                           key={topic.id}
                           variant="ghost"
                           className="w-full justify-between"
-                          onClick={() => handleTopicClick(topic.slug)}
+                          onClick={() => handleTopicClick(topic)}
                         >
                           <span className="text-left">
                             <span className="font-medium">
@@ -326,7 +335,7 @@ export default function SubjectDetailPage() {
                           key={topic.id}
                           variant="ghost"
                           className="w-full justify-between"
-                          onClick={() => handleTopicClick(topic.slug)}
+                          onClick={() => handleTopicClick(topic)}
                         >
                           <span className="text-left">
                             <span className="font-medium">
@@ -354,7 +363,7 @@ export default function SubjectDetailPage() {
                           key={topic.id}
                           variant="ghost"
                           className="w-full justify-between"
-                          onClick={() => handleTopicClick(topic.slug)}
+                          onClick={() => handleTopicClick(topic)}
                         >
                           <span className="text-left">
                             <span className="font-medium">

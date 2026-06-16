@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getPackage, subscribeToPackage, verifyCoupon } from "@/lib/api/subscription";
+import { trackEvent } from "@/lib/analytics/posthog";
 import { Package } from "@/lib/types/subscription";
 import { PackageCard } from "@/components/subscription/package-card";
 import { useForm } from "react-hook-form";
@@ -28,6 +29,7 @@ export default function CheckoutPage() {
   const [pkg, setPkg] = useState<Package | null>(null);
   const [isLoadingPackage, setIsLoadingPackage] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const hasTrackedCheckout = useRef(false);
 
   const [couponVerified, setCouponVerified] = useState(false);
   const [couponBreakdown, setCouponBreakdown] = useState<{ amount: string; discount_amount: string; payment_amount: string } | null>(null);
@@ -68,6 +70,15 @@ export default function CheckoutPage() {
 
     fetchPackage();
   }, [params.id, router]);
+
+  useEffect(() => {
+    if (!pkg || hasTrackedCheckout.current) return;
+    hasTrackedCheckout.current = true;
+    trackEvent("checkout_started", {
+      plan: pkg.name,
+      amount: pkg.amount,
+    });
+  }, [pkg]);
 
   const handleVerifyCoupon = async () => {
     if (!pkg) return;

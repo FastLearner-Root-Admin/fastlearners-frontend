@@ -12,6 +12,7 @@ import {
   getMissingFields,
   isProfileComplete,
 } from "@/lib/utils/profile-completion";
+import { resetAnalytics } from "@/lib/analytics/posthog";
 
 interface AuthState {
   // State
@@ -235,20 +236,8 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     try {
       set({ isLoading: true, error: null });
 
-      // Call server login to set HttpOnly cookies (adjust payload as per backend support)
-      const r = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email_phone: data.user.email,
-          password: "google-oauth",
-        }),
-      });
-      if (!r.ok) throw new Error("Google auth (server) failed");
-      const payload = await r.json();
-
       set({
-        user: payload?.user || data.user,
+        user: data.user,
         isAuthenticated: true,
         error: null,
       });
@@ -274,6 +263,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     } catch (error) {
       console.error("Logout API error:", error);
     } finally {
+      resetAnalytics();
       set({
         user: null,
         isAuthenticated: false,

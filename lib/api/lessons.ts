@@ -14,6 +14,7 @@ import type {
   TopicOverviewResponse,
   TopicsResponse,
 } from "@/lib/types/lessons";
+import { trackEvent } from "@/lib/analytics/posthog";
 
 // getLessonContent removed - use getLessonContentBySlug instead
 
@@ -42,6 +43,8 @@ export async function markLessonComplete(
         code: res.status,
       };
     }
+
+    trackEvent("lesson_completed", { lesson_id: lessonId });
 
     return {
       success: true,

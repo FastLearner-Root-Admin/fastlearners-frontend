@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { cn } from "@/lib/utils";
+import { identifyUser, trackEvent } from "@/lib/analytics/posthog";
+import { startGoogleAuth } from "@/lib/auth/google";
 import { loginSchema } from "@/lib/validations/auth";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -80,6 +82,14 @@ export function LoginForm({
         description: "Redirecting to your dashboard...",
         duration: 2000,
       });
+      identifyUser(user.email, {
+        email: user.email,
+        name: user.name,
+        role: userRole || null,
+        class: user.class || null,
+        auth_provider: "password",
+      });
+      trackEvent("user_logged_in", { method: "password", role: userRole });
 
       // Use window.location for hard navigation to ensure cookies are read
       // This prevents hydration issues
@@ -111,20 +121,9 @@ export function LoginForm({
         description: "You will be redirected back after authentication.",
       });
 
-      // Construct Google OAuth URL with our frontend callback
-      const googleOAuthUrl =
-        "https://accounts.google.com/o/oauth2/auth?" +
-        new URLSearchParams({
-          client_id:
-            "721571159309-mta5k0ge8ghrl4u5oenvuc54p6u77e67.apps.googleusercontent.com",
-          redirect_uri: `${window.location.origin}/auth/google/callback`,
-          scope: "openid profile email",
-          response_type: "code",
-        }).toString();
-
       // Small delay to show the loading state, then redirect
       setTimeout(() => {
-        window.location.href = googleOAuthUrl;
+        startGoogleAuth();
       }, 500);
     } catch (err: any) {
       console.error("Google login error:", err);

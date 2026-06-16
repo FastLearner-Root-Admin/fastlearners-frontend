@@ -6,6 +6,8 @@ import { useAuthStore } from "@/store/authStore";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { identifyUser, trackEvent } from "@/lib/analytics/posthog";
+
 function GoogleCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -15,17 +17,21 @@ function GoogleCallbackContent() {
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        const code = searchParams.get("code");
+        const hashParams = new URLSearchParams(
+          typeof window !== "undefined"
+            ? window.location.hash.replace(/^#/, "")
+            : "",
+        );
+        const idToken =
+          searchParams.get("id_token") || hashParams.get("id_token");
         const error = searchParams.get("error");
-        const scope = searchParams.get("scope");
-        const authuser = searchParams.get("authuser");
-        const prompt = searchParams.get("prompt");
+        const hashError = hashParams.get("error");
 
-        if (error) {
-          console.error("Google OAuth error:", error);
+        if (error || hashError) {
+          console.error("Google OAuth error:", error || hashError);
           toast.error("Google authentication failed", {
             description:
-              error === "access_denied"
+              (error || hashError) === "access_denied"
                 ? "You cancelled the Google authentication."
                 : "Authentication was cancelled or failed.",
           });
@@ -33,47 +39,51 @@ function GoogleCallbackContent() {
           return;
         }
 
-        if (!code) {
-          console.error("No authorization code received");
+        if (!idToken) {
+          console.error("No Google ID token received");
           toast.error("Google authentication failed", {
-            description: "No authorization code received from Google.",
+            description: "No Google ID token received.",
           });
           router.push("/auth/login");
           return;
         }
 
-        const callbackUrl = new URL(
-          "https://app.fastlearnersapp.com/api/v1/google/callback",
-        );
-        callbackUrl.searchParams.set("code", code);
-        if (scope) callbackUrl.searchParams.set("scope", scope);
-        if (authuser) callbackUrl.searchParams.set("authuser", authuser);
-        if (prompt) callbackUrl.searchParams.set("prompt", prompt);
-
-        const response = await fetch(callbackUrl.toString(), {
-          method: "GET",
+        const response = await fetch("/api/auth/google/callback", {
+          method: "POST",
           headers: {
-            Accept: "application/json",
             "Content-Type": "application/json",
           },
+          body: JSON.stringify({ id_token: idToken }),
         });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
 
         const data = await response.json();
 
         if (data.success && data.content) {
           await loginWithGoogle(data.content);
+          identifyUser(data.content.user?.email, {
+            email: data.content.user?.email,
+            name: data.content.user?.name,
+            role: data.content.user?.role?.[0] || null,
+            class: data.content.user?.class || null,
+            auth_provider: "google",
+          });
           const isNewUser =
-            data.content.user.role.includes("guest") || !data.content.user.name;
+            data.content.user?.role?.includes("guest") ||
+            !data.content.user?.name ||
+            data.content.user?.role?.length === 0;
+          trackEvent("user_logged_in", {
+            method: "google",
+            is_new_user: isNewUser,
+          });
+          if (isNewUser) {
+            trackEvent("user_signed_up", { method: "google" });
+          }
           if (isNewUser) {
             toast.success("Welcome to Fast Learners!", {
               description:
-                "Your Google account has been connected. Please complete your profile.",
+                "Your Google account has been connected. Please create your password.",
             });
-            router.push("/dashboard");
+            router.push("/auth/create-password");
           } else {
             toast.success("Welcome back!", {
               description: "You have successfully signed in with Google.",
