@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   AlertCircle,
   BookOpen,
@@ -24,7 +25,19 @@ import {
   uploadLessonsFileWithValidation,
   UploadResult,
   uploadSchemeOfWorkFileWithValidation,
+  updateCheckMarkersFileWithValidation,
+  updateConceptsFileWithValidation,
+  updateExamplesFileWithValidation,
+  updateExercisesFileWithValidation,
+  updateGeneralExercisesFileWithValidation,
+  updateLessonsFileWithValidation,
 } from "@/lib/api/lesson-service";
+import {
+  createLessonUploadReport,
+  hasLessonUploadIssues,
+  saveLessonUploadReport,
+  type LessonUploadMode,
+} from "@/lib/api/lesson-upload-results";
 import {
   parseUploadError,
   type ParsedUploadError,
@@ -41,6 +54,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -110,42 +124,49 @@ const UPLOAD_CONFIG: {
   title: string;
   description: string;
   uploadFn: (file: File) => Promise<UploadResult>;
+  updateFn?: (file: File) => Promise<UploadResult>;
 }[] = [
   {
     id: "lessons",
     title: "Lessons",
     description: "Upload main lessons data (topics, overviews, objectives)",
     uploadFn: uploadLessonsFileWithValidation,
+    updateFn: updateLessonsFileWithValidation,
   },
   {
     id: "concepts",
     title: "Concepts",
     description: "Upload lesson concepts and explanations",
     uploadFn: uploadConceptsFileWithValidation,
+    updateFn: updateConceptsFileWithValidation,
   },
   {
     id: "examples",
     title: "Examples",
     description: "Upload worked examples for concepts",
     uploadFn: uploadExamplesFileWithValidation,
+    updateFn: updateExamplesFileWithValidation,
   },
   {
     id: "exercises",
     title: "Exercises",
     description: "Upload practice exercises for concepts",
     uploadFn: uploadExercisesFileWithValidation,
+    updateFn: updateExercisesFileWithValidation,
   },
   {
     id: "general_exercises",
     title: "General Exercises",
     description: "Upload lesson-level general exercises",
     uploadFn: uploadGeneralExercisesFileWithValidation,
+    updateFn: updateGeneralExercisesFileWithValidation,
   },
   {
     id: "check_markers",
     title: "Check Markers",
     description: "Upload progress check markers",
     uploadFn: uploadCheckMarkersFileWithValidation,
+    updateFn: updateCheckMarkersFileWithValidation,
   },
   {
     id: "scheme_of_work",
@@ -156,6 +177,7 @@ const UPLOAD_CONFIG: {
 ];
 
 export default function UploadsPage() {
+  const router = useRouter();
   const {
     uploadStates,
     setUploadState,
@@ -174,6 +196,7 @@ export default function UploadsPage() {
   const [loadingPreview, setLoadingPreview] = useState<string | null>(null);
   const [bulkParsedError, setBulkParsedError] =
     useState<ParsedUploadError | null>(null);
+  const [uploadMode, setUploadMode] = useState<LessonUploadMode>("upload");
 
   // --- Individual Upload Handlers ---
 
@@ -213,18 +236,45 @@ export default function UploadsPage() {
       const config = UPLOAD_CONFIG.find((c) => c.id === type);
       if (!config) throw new Error("Invalid upload type");
 
-      const result = await config.uploadFn(state.selectedFile);
+      const activeUploadFn =
+        uploadMode === "update" && config.updateFn
+          ? config.updateFn
+          : config.uploadFn;
+      const result = await activeUploadFn(state.selectedFile);
 
       clearInterval(progressInterval);
 
       if (result.success) {
+        const report = result.apiResponse
+          ? createLessonUploadReport(
+              result.apiResponse,
+              config.title,
+              uploadMode,
+            )
+          : null;
+
+        if (report) {
+          saveLessonUploadReport(report);
+        }
+
         setUploadState(type, {
           isUploading: false,
           uploadProgress: 100,
           success: true,
           parsedError: undefined,
         });
-        toast.success(`${config.title} uploaded successfully`);
+        if (hasLessonUploadIssues(report)) {
+          toast.warning(`${config.title} completed with skipped rows`, {
+            description: "Review the upload result for correction details.",
+          });
+          router.push("/dashboard/superadmin/uploads/results");
+        } else {
+          toast.success(
+            `${config.title} ${
+              uploadMode === "update" ? "updated" : "uploaded"
+            } successfully`,
+          );
+        }
       } else {
         // Upload failed - use parsed error if available
         const errorMessage =
@@ -235,9 +285,14 @@ export default function UploadsPage() {
           error: errorMessage,
           parsedError: result.parsedError,
         });
-        toast.error(`Failed to upload ${config.title}`, {
-          description: errorMessage,
-        });
+        toast.error(
+          `Failed to ${uploadMode === "update" ? "update" : "upload"} ${
+            config.title
+          }`,
+          {
+            description: errorMessage,
+          },
+        );
       }
     } catch (error: any) {
       clearInterval(progressInterval);
@@ -248,7 +303,9 @@ export default function UploadsPage() {
         error: errorMessage,
         parsedError: undefined,
       });
-      toast.error(`Failed to upload ${type}`, { description: errorMessage });
+      toast.error(`Failed to ${uploadMode} ${type}`, {
+        description: errorMessage,
+      });
     }
   };
 
@@ -346,6 +403,11 @@ export default function UploadsPage() {
       clearInterval(progressInterval);
 
       if (result.success) {
+        const report = createLessonUploadReport(result, "Bulk Upload", "upload");
+        if (report) {
+          saveLessonUploadReport(report);
+        }
+
         setBulkStatus({
           isBulkUploading: false,
           bulkProgress: 100,
@@ -355,6 +417,10 @@ export default function UploadsPage() {
         toast.success("All files uploaded successfully", {
           description: result.message || "The database has been updated.",
         });
+
+        if (hasLessonUploadIssues(report)) {
+          router.push("/dashboard/superadmin/uploads/results");
+        }
       } else {
         throw new Error(result.message || "Bulk upload failed");
       }
@@ -444,12 +510,27 @@ export default function UploadsPage() {
       {/* Individual Uploads Section */}
       <div className="space-y-6">
         <div className="space-y-1">
-          <h2 className="text-2xl font-semibold tracking-tight">
-            Individual Uploads
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Upload specific content files one by one for granular control
-          </p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-2xl font-semibold tracking-tight">
+                Individual Uploads
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Upload or update specific content files one by one
+              </p>
+            </div>
+            <Tabs
+              value={uploadMode}
+              onValueChange={(value) =>
+                setUploadMode(value as LessonUploadMode)
+              }
+            >
+              <TabsList>
+                <TabsTrigger value="upload">Upload</TabsTrigger>
+                <TabsTrigger value="update">Update</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -475,11 +556,20 @@ export default function UploadsPage() {
                   <Button
                     className="w-full"
                     onClick={() => handleUpload(config.id)}
+                    disabled={uploadMode === "update" && !config.updateFn}
                   >
                     <Upload className="mr-2 size-4" />
-                    Upload {config.title}
+                    {uploadMode === "update" && config.updateFn
+                      ? "Update"
+                      : "Upload"}{" "}
+                    {config.title}
                   </Button>
                 )}
+              {uploadMode === "update" && !config.updateFn && (
+                <p className="text-xs text-muted-foreground">
+                  Update endpoint is not available for this file type yet.
+                </p>
+              )}
             </div>
           ))}
         </div>

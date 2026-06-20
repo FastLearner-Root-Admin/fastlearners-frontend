@@ -335,6 +335,60 @@ export const uploadSchemeOfWorkFile = async (
   return data;
 };
 
+const uploadLessonUpdateFile = async (
+  file: File,
+  fieldName: string,
+  uploadType: string,
+): Promise<ApiResponse> => {
+  const formData = new FormData();
+  formData.append(fieldName, file);
+
+  const response = await fetch(`/api/uploads/update/${uploadType}`, {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    const error: any = new Error(
+      data?.message || data?.error || "Update failed",
+    );
+    error.response = response;
+    error.data = data;
+    throw error;
+  }
+
+  return data;
+};
+
+export const updateLessonsFile = async (file: File): Promise<ApiResponse> =>
+  uploadLessonUpdateFile(file, "lessons_file", "lessons");
+
+export const updateConceptsFile = async (file: File): Promise<ApiResponse> =>
+  uploadLessonUpdateFile(file, "concepts_file", "concepts");
+
+export const updateExamplesFile = async (file: File): Promise<ApiResponse> =>
+  uploadLessonUpdateFile(file, "examples_file", "examples");
+
+export const updateExercisesFile = async (file: File): Promise<ApiResponse> =>
+  uploadLessonUpdateFile(file, "exercises_file", "exercises");
+
+export const updateGeneralExercisesFile = async (
+  file: File,
+): Promise<ApiResponse> =>
+  uploadLessonUpdateFile(
+    file,
+    "general_exercises_file",
+    "general-exercises",
+  );
+
+export const updateCheckMarkersFile = async (
+  file: File,
+): Promise<ApiResponse> =>
+  uploadLessonUpdateFile(file, "check_markers_file", "check-markers");
+
 export const uploadAllLessonFiles = async (files: {
   lessons_file: File;
   concepts_file: File;
@@ -633,6 +687,72 @@ export const uploadSchemeOfWorkFileWithValidation = async (
     SCHEME_OF_WORK_REQUIRED_COLUMNS,
     uploadSchemeOfWorkFile,
     "scheme_of_work",
+  );
+};
+
+export const updateLessonsFileWithValidation = async (
+  file: File,
+): Promise<UploadResult> => {
+  return await smartUploadWithValidation(
+    file,
+    LESSON_REQUIRED_COLUMNS,
+    updateLessonsFile,
+    "lessons",
+  );
+};
+
+export const updateConceptsFileWithValidation = async (
+  file: File,
+): Promise<UploadResult> => {
+  return await smartUploadWithValidation(
+    file,
+    CONCEPT_REQUIRED_COLUMNS,
+    updateConceptsFile,
+    "concepts",
+  );
+};
+
+export const updateExamplesFileWithValidation = async (
+  file: File,
+): Promise<UploadResult> => {
+  return await smartUploadWithValidation(
+    file,
+    EXAMPLE_REQUIRED_COLUMNS,
+    updateExamplesFile,
+    "examples",
+  );
+};
+
+export const updateExercisesFileWithValidation = async (
+  file: File,
+): Promise<UploadResult> => {
+  return await smartUploadWithValidation(
+    file,
+    EXERCISE_REQUIRED_COLUMNS,
+    updateExercisesFile,
+    "exercises",
+  );
+};
+
+export const updateGeneralExercisesFileWithValidation = async (
+  file: File,
+): Promise<UploadResult> => {
+  return await smartUploadWithValidation(
+    file,
+    GENERAL_EXERCISE_REQUIRED_COLUMNS,
+    updateGeneralExercisesFile,
+    "general_exercises",
+  );
+};
+
+export const updateCheckMarkersFileWithValidation = async (
+  file: File,
+): Promise<UploadResult> => {
+  return await smartUploadWithValidation(
+    file,
+    CHECK_MARKER_REQUIRED_COLUMNS,
+    updateCheckMarkersFile,
+    "check_markers",
   );
 };
 
