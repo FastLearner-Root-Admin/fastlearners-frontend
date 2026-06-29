@@ -12,6 +12,12 @@ import {
   getMissingFields,
   isProfileComplete,
 } from "@/lib/utils/profile-completion";
+import {
+  getPrimaryRole,
+  normalizeUser,
+  normalizeUserRoles,
+  userHasRole,
+} from "@/lib/utils/roles";
 import { resetAnalytics } from "@/lib/analytics/posthog";
 
 interface AuthState {
@@ -67,7 +73,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
 
   // Actions
   setUser: (user: User) => {
-    set({ user, isAuthenticated: true, error: null });
+    set({ user: normalizeUser(user), isAuthenticated: true, error: null });
   },
 
   setLoading: (loading: boolean) => set({ isLoading: loading }),
@@ -123,9 +129,10 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
           }
 
           const data = await response.json();
+          const user = data.user ? normalizeUser(data.user) : null;
           set({
-            user: data.user || null,
-            isAuthenticated: Boolean(data.user),
+            user,
+            isAuthenticated: Boolean(user),
             isLoading: false,
             isHydrated: true,
             isHydrating: false,
@@ -192,7 +199,11 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       const data = await r.json();
 
       if (r.ok && data?.user) {
-        set({ user: data.user, isAuthenticated: true, error: null });
+        set({
+          user: normalizeUser(data.user),
+          isAuthenticated: true,
+          error: null,
+        });
         return;
       }
 
@@ -237,7 +248,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       set({ isLoading: true, error: null });
 
       set({
-        user: data.user,
+        user: normalizeUser(data.user),
         isAuthenticated: true,
         error: null,
       });
@@ -325,7 +336,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     const user = get().user;
     if (!user) return false;
 
-    const isGuest = user.role[0] === "guest";
+      const isGuest = getPrimaryRole(user) === "guest";
 
     const restrictedFeatures = [
       "submit_assignment",
@@ -350,12 +361,12 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   // Role-based helpers
   hasRole: (role: UserRole): boolean => {
     const user = get().user;
-    return user ? user.role.includes(role) : false;
+    return userHasRole(user, role);
   },
 
   isPrimaryRole: (role: UserRole): boolean => {
     const user = get().user;
-    return user ? user.role[0] === role : false;
+    return getPrimaryRole(user) === role;
   },
 
   isGuest: (): boolean => {
@@ -368,7 +379,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
 
     // Only guests can change their role (during onboarding)
     // Once a user has selected student or guardian, they cannot change
-    return user.role[0] === "guest";
+    return getPrimaryRole(user) === "guest";
   },
 
   hasAcademicFieldsChanged: (updates: Partial<User>): boolean => {
@@ -378,7 +389,10 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     return (
       Boolean(updates.class && updates.class !== user.class) ||
       Boolean(updates.discipline && updates.discipline !== user.discipline) ||
-      Boolean(updates.role && updates.role[0] !== user.role[0])
+      Boolean(
+        updates.role &&
+          normalizeUserRoles(updates.role)[0] !== getPrimaryRole(user),
+      )
     );
   },
 }));
@@ -388,7 +402,7 @@ export const checkGuestAccess = (
   action: string,
   user: User | null,
 ): boolean => {
-  if (!user || user.role[0] !== "guest") return true;
+  if (!user || getPrimaryRole(user) !== "guest") return true;
 
   const restrictedActions = [
     "submit_assignment",
@@ -408,7 +422,7 @@ export const getRoleBasedRoute = (user: User | null): string => {
 
   // Import RBAC utilities dynamically to avoid circular dependency
   const { RBACUtils } = require("@/lib/rbac/role-config");
-  return RBACUtils.getHomeRoute(user.role[0]);
+  return RBACUtils.getHomeRoute(getPrimaryRole(user));
 };
 
 // Cookie-based auth store doesn't need manual initialization

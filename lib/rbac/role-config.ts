@@ -1,5 +1,6 @@
 import { User, UserRole } from "@/lib/types/auth";
 import { isProfileComplete } from "@/lib/utils/profile-completion";
+import { getPrimaryRole } from "@/lib/utils/roles";
 
 /**
  * Single source of truth for role-based routing and access control
@@ -220,11 +221,12 @@ export class RBACUtils {
    */
   static canAccessRoute(user: User | null, route: string): boolean {
     if (!user) return false;
-    if (!user.role || !Array.isArray(user.role) || user.role.length === 0) {
+    const userRole = getPrimaryRole(user);
+
+    if (!userRole) {
       console.warn("Invalid or missing user role array in canAccessRoute");
       return false;
     }
-    const userRole = user.role[0];
 
     // Special handling for onboarding routes
     if (route.startsWith("/onboarding")) {

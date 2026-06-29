@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import { motion } from "framer-motion";
 
+import { getPrimaryRole } from "@/lib/utils/roles";
 import { Button } from "@/components/ui/button";
 import {
   AdminDashboard,
@@ -14,15 +16,6 @@ import {
   TeacherDashboard,
 } from "@/components/dashboard/role-dashboards";
 import { EmptyPlaceholder } from "@/components/shared/empty-placeholder";
-
-const KNOWN_ROLES = new Set([
-  "student",
-  "guardian",
-  "teacher",
-  "admin",
-  "superadmin",
-  "guest",
-]);
 
 // Loading component with nice animation
 function DashboardLoading() {
@@ -94,6 +87,7 @@ function RoleDashboard({ userRole }: { userRole: string }) {
 
 export default function UnifiedDashboardPage() {
   const { user, isHydrated, hydrate } = useAuthStore();
+  const router = useRouter();
 
   // Hydrate auth store on mount
   useEffect(() => {
@@ -102,25 +96,17 @@ export default function UnifiedDashboardPage() {
     }
   }, [isHydrated, hydrate]);
 
+  const primaryRole = getPrimaryRole(user);
+
+  useEffect(() => {
+    if (isHydrated && user && !primaryRole) {
+      router.replace("/auth/create-password");
+    }
+  }, [isHydrated, primaryRole, router, user]);
+
   // Show loading state while user data is being fetched
-  if (!isHydrated || !user) {
+  if (!isHydrated || !user || !primaryRole) {
     return <DashboardLoading />;
-  }
-
-  const normalizedRoles = Array.isArray(user.role)
-    ? user.role
-        .filter((role) => typeof role === "string")
-        .map((role) => role.toLowerCase())
-    : [];
-
-  const primaryRole = normalizedRoles.find((role) => KNOWN_ROLES.has(role));
-
-  if (!primaryRole && process.env.NODE_ENV !== "production") {
-    console.warn(
-      "[dashboard] Unable to resolve user role from",
-      user.role,
-      "— rendering fallback UI.",
-    );
   }
 
   return (
@@ -131,7 +117,7 @@ export default function UnifiedDashboardPage() {
       className="min-h-screen bg-background"
     >
       <div className="container mx-auto px-4 py-6 sm:px-6 sm:py-8">
-        <RoleDashboard userRole={primaryRole ?? "unrecognized"} />
+        <RoleDashboard userRole={primaryRole} />
       </div>
     </motion.div>
   );

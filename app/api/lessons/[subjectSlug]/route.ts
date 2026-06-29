@@ -8,6 +8,44 @@ import {
 } from "@/lib/api/error-handler";
 import { parseAuthCookiesServer } from "@/lib/server/auth-cookies";
 
+const toNumericWeek = (value: unknown) => {
+  if (typeof value === "number") return value;
+  if (typeof value === "string") {
+    const match = value.match(/\d+/);
+    return match ? Number(match[0]) : Number.MAX_SAFE_INTEGER;
+  }
+  return Number.MAX_SAFE_INTEGER;
+};
+
+const sortTopicsByWeek = (data: any) => {
+  const topics = data?.content?.topics;
+  if (!topics || typeof topics !== "object") return data;
+
+  const sortedTopics = Object.fromEntries(
+    Object.entries(topics).map(([term, items]) => {
+      if (!Array.isArray(items)) return [term, items];
+
+      return [
+        term,
+        [...items].sort((a, b) => {
+          const weekDifference = toNumericWeek(a?.week) - toNumericWeek(b?.week);
+          if (weekDifference !== 0) return weekDifference;
+
+          return Number(a?.order_index ?? 0) - Number(b?.order_index ?? 0);
+        }),
+      ];
+    }),
+  );
+
+  return {
+    ...data,
+    content: {
+      ...data.content,
+      topics: sortedTopics,
+    },
+  };
+};
+
 export async function GET(
   req: NextRequest,
   { params }: { params: { subjectSlug: string } },
@@ -52,7 +90,9 @@ export async function GET(
         return handleUpstreamError(upstream, data, requestId);
       }
 
-      return NextResponse.json(data, { status: upstream.status });
+      return NextResponse.json(sortTopicsByWeek(data), {
+        status: upstream.status,
+      });
     } catch (fetchError: any) {
       clearTimeout(timeoutId);
 
@@ -80,7 +120,9 @@ export async function GET(
             return handleUpstreamError(retryUpstream, retryData, requestId);
           }
 
-          return NextResponse.json(retryData, { status: retryUpstream.status });
+          return NextResponse.json(sortTopicsByWeek(retryData), {
+            status: retryUpstream.status,
+          });
         } catch (retryError) {
           return handleApiError(
             retryError,
