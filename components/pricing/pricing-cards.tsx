@@ -23,33 +23,6 @@ interface PricingCardsProps {
 export function PricingCards({ userId, subscriptionPlan }: PricingCardsProps) {
   const isYearly = false;
   const { setShowSignInModal } = useContext(ModalContext);
-  const releasePhases = [
-    {
-      title: "Phase One: Partial Release",
-      price: "₦1,000/month",
-      description:
-        "Current package with English Language and General Mathematics curriculum coverage, interactive lesson notes, concept and lesson-based exercises, and progress reporting.",
-    },
-    {
-      title: "Phase Two: Full Subjects Release",
-      price: "₦3,000/month",
-      description:
-        "Planned September release with full subject access, complete curriculum coverage, interactive notes, exercises, and learner progress tracking.",
-    },
-    {
-      title: "Phase Three: Full Learning Experience",
-      price: "₦5,000/month",
-      description:
-        "Planned April 2027 release with full curriculum access, lesson videos, educational games, practice questions, quiz competition, and enhanced reporting.",
-    },
-  ];
-
-  const refundExceptions = [
-    "A verified duplicate charge caused by a payment processing error. First-mile bank charges cannot be refunded.",
-    "A subscription cannot be activated due to a confirmed FastLearners technical fault that remains unresolved after one week.",
-    "Payment is successful but no subscription benefit is provided and the issue cannot be corrected.",
-    "A wrong package may be changed, with any eligible balance held for the next subscription season.",
-  ];
 
   const PricingCard = ({ offer }: { offer: SubscriptionPlan }) => {
     const monthlyPrice =
@@ -163,80 +136,16 @@ export function PricingCards({ userId, subscriptionPlan }: PricingCardsProps) {
             {siteConfig.mailSupport}
           </a>{" "}
           to contact our support team.
-        </p>
-      </section>
-
-      <section className="mx-auto mt-12 max-w-5xl space-y-8 text-left sm:mt-16">
-        <div className="space-y-3 text-center">
-          <p className="text-sm font-semibold uppercase tracking-wider text-primary">
+          <br />
+          View our{" "}
+          <Link
+            href="/pricing-refund-policy"
+            className="font-medium text-primary hover:underline"
+          >
             Pricing and Refund Policy
-          </p>
-          <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            Current pricing and subscription terms
-          </h2>
-          <p className="mx-auto max-w-3xl text-sm leading-6 text-muted-foreground sm:text-base">
-            FastLearners subscriptions are charged in advance through approved
-            payment providers. Existing subscribers will receive reasonable
-            notice before any new pricing phase takes effect.
-          </p>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-3">
-          {releasePhases.map((phase) => (
-            <div
-              key={phase.title}
-              className="rounded-xl border bg-card p-5 shadow-sm"
-            >
-              <p className="text-sm font-semibold text-primary">
-                {phase.title}
-              </p>
-              <p className="mt-3 text-2xl font-bold text-foreground">
-                {phase.price}
-              </p>
-              <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                {phase.description}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        <div className="grid gap-6 rounded-xl border bg-card p-5 shadow-sm sm:p-6 md:grid-cols-[0.9fr_1.1fr]">
-          <div className="space-y-3">
-            <h3 className="text-xl font-semibold text-foreground">
-              Refund policy
-            </h3>
-            <p className="text-sm leading-6 text-muted-foreground">
-              All subscription payments are generally final and non-refundable,
-              including payments made due to change of mind, unused access,
-              failure to cancel, or dissatisfaction after access has been
-              granted.
-            </p>
-            <p className="text-sm leading-6 text-muted-foreground">
-              Refund requests must be submitted within seven (7) days of
-              payment and must include payment evidence, transaction references,
-              and any information needed to verify the request.
-            </p>
-          </div>
-
-          <div className="space-y-3">
-            <p className="text-sm font-semibold text-foreground">
-              Refund exceptions may apply where:
-            </p>
-            <ul className="space-y-2 text-sm leading-6 text-muted-foreground">
-              {refundExceptions.map((exception) => (
-                <li className="flex gap-3" key={exception}>
-                  <Icons.check className="mt-0.5 size-4 shrink-0 text-primary" />
-                  <span>{exception}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="text-sm leading-6 text-muted-foreground">
-              Approved refunds are processed through the original payment method
-              where possible. Processing time depends on the payment provider or
-              bank.
-            </p>
-          </div>
-        </div>
+          </Link>
+          .
+        </p>
       </section>
     </MaxWidthWrapper>
   );
