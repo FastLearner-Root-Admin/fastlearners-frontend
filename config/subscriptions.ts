@@ -18,7 +18,7 @@ export const pricingData: SubscriptionPlan[] = [
     ],
     limitations: [],
     prices: {
-      monthly: 0,
+      monthly: 1000,
       yearly: 0,
     },
     stripeIds: {

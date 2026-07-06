@@ -146,7 +146,28 @@ export default function TermsOfServicePage() {
 
         <section className="space-y-4">
           <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
-            5. Third-Party Services
+            5. Notification Retention
+          </h2>
+          <p className="leading-relaxed text-muted-foreground">
+            FastLearners may retain in-app and account notifications for a
+            period of three (3) to six (6) months for user access, service
+            continuity, audit, support, and platform management purposes.
+            Notifications are not deleted from our system for at least three
+            (3) months unless deletion is required by law, security, or
+            operational necessity.
+          </p>
+          <p className="leading-relaxed text-muted-foreground">
+            Users may delete notifications from their own account or
+            notification centre where this feature is available. We may also
+            carry out routine database cleanup of notifications after the
+            applicable three (3) to six (6) month retention period, subject to
+            any legal, compliance, security, or dispute-resolution obligations.
+          </p>
+        </section>
+
+        <section className="space-y-4">
+          <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+            6. Third-Party Services
           </h2>
           <p className="leading-relaxed text-muted-foreground">
             The Platform may integrate or link to third-party services (e.g.,
@@ -159,7 +180,7 @@ export default function TermsOfServicePage() {
 
         <section className="space-y-4">
           <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
-            6. Termination and Suspension
+            7. Termination and Suspension
           </h2>
           <p className="leading-relaxed text-muted-foreground">
             We reserve the right to suspend or terminate your account and access
@@ -183,7 +204,7 @@ export default function TermsOfServicePage() {
 
         <section className="space-y-4">
           <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
-            7. Disclaimer of Warranties
+            8. Disclaimer of Warranties
           </h2>
           <p className="leading-relaxed text-muted-foreground">
             The Platform is provided on an &quot;as is&quot; and &quot;as
@@ -197,7 +218,7 @@ export default function TermsOfServicePage() {
 
         <section className="space-y-4">
           <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
-            8. Limitation of Liability
+            9. Limitation of Liability
           </h2>
           <p className="leading-relaxed text-muted-foreground">
             To the maximum extent permitted by law, FastLearners Limited and its
@@ -215,7 +236,7 @@ export default function TermsOfServicePage() {
 
         <section className="space-y-4">
           <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
-            9. Governing Law and Dispute Resolution
+            10. Governing Law and Dispute Resolution
           </h2>
           <p className="leading-relaxed text-muted-foreground">
             These Terms shall be governed by and construed in accordance with
@@ -252,7 +273,7 @@ export default function TermsOfServicePage() {
 
         <section className="space-y-4">
           <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
-            10. Changes to These Terms
+            11. Changes to These Terms
           </h2>
           <p className="leading-relaxed text-muted-foreground">
             We may update these Terms from time to time. We will notify you of
