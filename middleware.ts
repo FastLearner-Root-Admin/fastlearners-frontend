@@ -18,18 +18,14 @@ function isValidRole(role: RoleFetchResult): role is UserRole {
   );
 }
 
+function getApiBaseUrl() {
+  return process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") || null;
+}
+
 async function getUserRoleFromBackend(
   authToken: string,
 ): Promise<RoleFetchResult> {
-  // Require NEXT_PUBLIC_API_URL to be present
-  // Only allow hardcoded fallback in production environment
-  // Note: Middleware uses stricter fallback (production-only) compared to session route
-  // to avoid cross-origin calls in local dev environments
-  const BASE_URL =
-    process.env.NEXT_PUBLIC_API_URL ||
-    (process.env.NODE_ENV === "production"
-      ? "https://app.fastlearnersapp.com/api/v1"
-      : null);
+  const BASE_URL = getApiBaseUrl();
 
   if (!BASE_URL) {
     if (process.env.NEXT_PUBLIC_DEBUG_AUTH === "true") {
@@ -230,11 +226,7 @@ export async function middleware(request: NextRequest) {
       let fullUser: User | null = null;
       if (authData) {
         try {
-          const BASE_URL =
-            process.env.NEXT_PUBLIC_API_URL ||
-            (process.env.NODE_ENV === "production"
-              ? "https://app.fastlearnersapp.com/api/v1"
-              : null);
+          const BASE_URL = getApiBaseUrl();
 
           if (BASE_URL) {
             const profileResponse = await fetch(`${BASE_URL}/profile`, {

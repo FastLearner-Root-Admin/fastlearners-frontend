@@ -38,17 +38,15 @@ export function getYouTubeEmbedUrl(
   return null;
 }
 
-const DEFAULT_API_ORIGIN = "https://app.fastlearnersapp.com";
-
 function getApiOrigin() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-  if (!apiUrl) return DEFAULT_API_ORIGIN;
+  if (!apiUrl) return "";
 
   try {
     return new URL(apiUrl).origin;
   } catch {
-    return DEFAULT_API_ORIGIN;
+    return "";
   }
 }
 
@@ -62,5 +60,7 @@ export function resolveMediaUrl(path?: string | null) {
   if (value.startsWith("/")) return value;
 
   const normalizedPath = value.replace(/^\.\//, "");
-  return `${getApiOrigin()}/${normalizedPath.replace(/^\/+/, "")}`;
+  const apiOrigin = getApiOrigin();
+  const cleanPath = normalizedPath.replace(/^\/+/, "");
+  return apiOrigin ? `${apiOrigin}/${cleanPath}` : `/${cleanPath}`;
 }

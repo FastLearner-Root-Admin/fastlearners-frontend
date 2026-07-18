@@ -263,10 +263,22 @@ export default function UploadsPage() {
           success: true,
           parsedError: undefined,
         });
-        if (hasLessonUploadIssues(report)) {
-          toast.warning(`${config.title} completed with skipped rows`, {
-            description: "Review the upload result for correction details.",
-          });
+        if (report) {
+          if (hasLessonUploadIssues(report)) {
+            toast.warning(`${config.title} completed with skipped rows`, {
+              description: "Review the upload result for correction details.",
+            });
+          } else {
+            toast.success(
+              `${config.title} ${
+                uploadMode === "update" ? "updated" : "uploaded"
+              } successfully`,
+              {
+                description: "Review the processing summary for the counts.",
+              },
+            );
+          }
+
           router.push("/dashboard/superadmin/uploads/results");
         } else {
           toast.success(
@@ -414,12 +426,22 @@ export default function UploadsPage() {
           bulkSuccess: true,
         });
         setBulkParsedError(null);
-        toast.success("All files uploaded successfully", {
-          description: result.message || "The database has been updated.",
-        });
+        if (report) {
+          if (hasLessonUploadIssues(report)) {
+            toast.warning("Bulk upload completed with skipped rows", {
+              description: "Review the upload result for correction details.",
+            });
+          } else {
+            toast.success("All files uploaded successfully", {
+              description: "Review the processing summary for the counts.",
+            });
+          }
 
-        if (hasLessonUploadIssues(report)) {
           router.push("/dashboard/superadmin/uploads/results");
+        } else {
+          toast.success("All files uploaded successfully", {
+            description: result.message || "The database has been updated.",
+          });
         }
       } else {
         throw new Error(result.message || "Bulk upload failed");

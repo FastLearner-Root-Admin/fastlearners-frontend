@@ -4,11 +4,13 @@ import { z } from "zod";
 
 // Environment validation schema
 const apiEnvSchema = z.object({
-  NEXT_PUBLIC_API_URL: z.string().url().optional(),
+  NEXT_PUBLIC_API_URL: z.string().url(),
 });
 
+type ApiEnv = z.infer<typeof apiEnvSchema>;
+
 // Validate environment variables
-function validateApiEnv() {
+function validateApiEnv(): ApiEnv | null {
   try {
     const env = {
       NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
@@ -26,6 +28,8 @@ function validateApiEnv() {
       } else {
         throw new Error(`Invalid API configuration: ${errors}`);
       }
+
+      return null;
     }
 
     return result.data;
@@ -36,14 +40,17 @@ function validateApiEnv() {
         error,
       );
     }
-    return {};
+    return null;
   }
 }
 
-// Get API URL from environment or default
+// Get API URL from environment
 const env = validateApiEnv();
-export const BASE_API_URL =
-  env?.NEXT_PUBLIC_API_URL || "https://app.fastlearnersapp.com/api/v1";
+if (!env?.NEXT_PUBLIC_API_URL) {
+  throw new Error("NEXT_PUBLIC_API_URL must be configured.");
+}
+
+export const BASE_API_URL = env.NEXT_PUBLIC_API_URL.replace(/\/$/, "");
 
 // Helper to build request headers for internal API routes (uses cookies)
 export function buildInternalApiHeaders(token?: string): HeadersInit {

@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 export interface ApiErrorResponse {
   success: false;
   message: string;
-  content: null;
+  content: any;
   code: number;
   requestId: string;
   errorCode?: string;
@@ -68,7 +68,7 @@ export function handleUpstreamError(
     {
       success: false,
       message,
-      content: null,
+      content: upstreamData?.content ?? null,
       code: upstreamResponse.status,
       requestId: id,
       ...(errorCode && { errorCode }),

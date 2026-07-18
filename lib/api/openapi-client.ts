@@ -1,5 +1,7 @@
 import axios from "axios";
 
+import { BASE_API_URL } from "@/lib/api/client";
+
 // Generated types will be written to types/openapi/fastlearners.ts by running:
 //   pnpm gen:openapi
 // We import them with a type-only import to avoid runtime issues if not generated yet.
@@ -10,8 +12,7 @@ export type User = components["schemas"]["User"];
 export type AuthTokens = components["schemas"]["AuthTokens"];
 
 const api = axios.create({
-  baseURL:
-    process.env.NEXT_PUBLIC_API_URL || "https://app.fastlearnersapp.com/api/v1",
+  baseURL: BASE_API_URL,
   headers: { Accept: "application/json" },
 });
 

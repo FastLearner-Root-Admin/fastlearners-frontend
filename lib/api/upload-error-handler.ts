@@ -150,7 +150,7 @@ export function parseUploadError(
   } else if (code >= 500) {
     category = "server";
     userMessage =
-      "An unexpected server error occurred while processing your upload.";
+      message || "An unexpected server error occurred while processing your upload.";
     suggestedAction =
       "Please try again later. If the problem persists, contact support.";
   }

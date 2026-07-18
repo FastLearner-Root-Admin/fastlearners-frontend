@@ -43,7 +43,7 @@ const countFromContent = (
   const preferredKeys =
     mode === "update"
       ? ["update_count", "updated_count"]
-      : ["upload_count", "uploaded_count"];
+      : ["upload_count", "uploaded_count", "updated_count"];
 
   for (const key of preferredKeys) {
     const value = content[key];
@@ -99,7 +99,7 @@ export const createLessonUploadReport = (
   return {
     title,
     mode,
-    message: response.message,
+    message: response.message || `${title} ${mode} completed.`,
     processedCount: countFromContent(content, mode),
     skippedCount: explicitSkippedCount,
     items,
