@@ -185,7 +185,7 @@ export async function adminCreateNotification(
   data: CreateNotificationData,
 ): Promise<ApiResponse<null>> {
   try {
-    const res = await fetch("/api/proxy/superadmin/notification/create", withJson(data));
+    const res = await fetch("/api/proxy/superadmin/notifications/create", withJson(data));
     return await res.json();
   } catch (error: any) {
     return apiError(error, "Failed to create notification");
@@ -240,7 +240,7 @@ export async function adminCreateNotificationAudience(
 ): Promise<ApiResponse<NotificationAudience>> {
   try {
     const res = await fetch(
-      "/api/proxy/superadmin/notification/audience/create",
+      "/api/proxy/superadmin/notifications/audience/create",
       withJson(data),
     );
     return await res.json();
@@ -300,7 +300,7 @@ export async function adminCreateNotificationType(
 ): Promise<ApiResponse<NotificationType>> {
   try {
     const res = await fetch(
-      "/api/proxy/superadmin/notification/types/create",
+      "/api/proxy/superadmin/notifications/types/create",
       withJson(data),
     );
     return await res.json();
