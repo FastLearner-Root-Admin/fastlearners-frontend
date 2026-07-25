@@ -43,6 +43,8 @@ function unwrapUserNotificationPage(data: any) {
         ? page.data
         : Array.isArray(data?.content?.data)
           ? data.content.data
+          : Array.isArray(data?.content?.notification)
+            ? data.content.notification
           : [];
 
   data.content = {
@@ -63,6 +65,8 @@ function unwrapBellNotifications(data: any) {
         ? notifications.notifications
         : Array.isArray(notifications?.data)
           ? notifications.data
+          : Array.isArray(data?.content?.data)
+            ? data.content.data
           : [],
   };
   return data;
@@ -98,6 +102,10 @@ function unwrapAdminNotificationPage(data: any) {
         ? source.data
         : Array.isArray(data?.content?.data)
           ? data.content.data
+          : Array.isArray(data?.content?.data?.notifications)
+            ? data.content.data.notifications
+          : Array.isArray(data?.content?.notification)
+            ? data.content.notification
           : [];
 
   data.content = {

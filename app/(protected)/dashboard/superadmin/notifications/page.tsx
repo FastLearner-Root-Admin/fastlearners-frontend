@@ -231,7 +231,10 @@ export default function SuperadminNotificationsPage() {
             mode="create"
             audiences={audiences}
             types={types}
-            onSuccess={async () => {
+            onSuccess={async (notification) => {
+              if (notification?.id) {
+                setNotifications((prev) => [notification, ...prev]);
+              }
               await fetchPageData();
               setIsCreateOpen(false);
             }}

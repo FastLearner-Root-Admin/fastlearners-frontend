@@ -52,7 +52,7 @@ interface NotificationFormProps {
   mode: "create" | "edit";
   initialData?: AdminNotification;
   onCancel: () => void;
-  onSuccess: () => void;
+  onSuccess: (notification?: AdminNotification) => void;
 }
 
 export function NotificationForm({
@@ -111,7 +111,11 @@ export function NotificationForm({
           response.message ||
             `Notification ${mode === "create" ? "created" : "updated"}`,
         );
-        onSuccess();
+        const createdNotification =
+          (response.content as any)?.notification ||
+          (response.content as any)?.notifications ||
+          response.content;
+        onSuccess(createdNotification as AdminNotification | undefined);
       } else if (response.errors) {
         Object.entries(response.errors).forEach(([key, messages]) => {
           form.setError(key as keyof NotificationFormValues, {

@@ -5,6 +5,7 @@ import { Bell, CheckCheck, Loader2, MailOpen, Trash2 } from "lucide-react";
 
 import {
   deleteNotification,
+  getBellNotifications,
   getNotifications,
   getUnreadNotifications,
   markAllNotificationsAsRead,
@@ -44,7 +45,20 @@ export default function NotificationsPage() {
         : await getNotifications(page);
 
     if (response.success && response.content) {
-      setNotifications(response.content.notifications || []);
+      let nextNotifications = response.content.notifications || [];
+
+      if (nextNotifications.length === 0 && page === 1) {
+        const fallbackResponse = await getBellNotifications();
+        if (fallbackResponse.success && fallbackResponse.content) {
+          nextNotifications = fallbackResponse.content.notifications || [];
+        }
+      }
+
+      setNotifications(
+        view === "unread"
+          ? nextNotifications.filter((notification) => !notification.read)
+          : nextNotifications,
+      );
       setPagination({
         links: response.content.links,
         meta: response.content.meta,
