@@ -3,6 +3,7 @@ import {
   ArrowRight,
   ArrowUpRight,
   BarChart3,
+  Bell,
   BookOpen,
   Building,
   Calculator,
@@ -86,6 +87,7 @@ export const Icons = {
     </svg>
   ),
   barChart3: BarChart3,
+  bell: Bell,
   billing: CreditCard,
   bookOpen: BookOpen,
   building: Building,

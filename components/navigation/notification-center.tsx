@@ -1,9 +1,18 @@
 "use client";
 
+import Link from "next/link";
 import { startTransition, useCallback, useEffect, useState } from "react";
-import { Bell, Check, Trash2, X } from "lucide-react";
+import { Bell, Check, Loader2, Trash2, X } from "lucide-react";
 
+import {
+  deleteNotification,
+  getBellNotifications,
+  markAllNotificationsAsRead,
+  markNotificationAsRead,
+} from "@/lib/api/notifications";
+import { UserNotification } from "@/lib/types/notification";
 import { cn } from "@/lib/utils";
+import { showApiToast } from "@/lib/utils/api-toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,134 +25,123 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-// Type definitions
-interface Notification {
-  id: string;
-  type: "info" | "success" | "warning" | "error";
-  title: string;
-  message: string;
-  timestamp: Date;
-  isRead: boolean;
-}
-
-// Mock notification data
-const mockNotifications: Notification[] = [
-  {
-    id: "1",
-    type: "success",
-    title: "Profile Updated",
-    message: "Your profile information has been successfully updated.",
-    timestamp: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
-    isRead: false,
-  },
-  {
-    id: "2",
-    type: "info",
-    title: "New Feature Available",
-    message: "Check out the new dashboard analytics feature.",
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-    isRead: false,
-  },
-  {
-    id: "3",
-    type: "warning",
-    title: "Subscription Expiring",
-    message: "Your premium subscription will expire in 3 days.",
-    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
-    isRead: true,
-  },
-  {
-    id: "4",
-    type: "error",
-    title: "Failed Upload",
-    message: "Unable to upload lesson file. Please try again.",
-    timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-    isRead: false,
-  },
-];
+const BELL_REFRESH_INTERVAL_MS = 30 * 60 * 1000;
 
 interface NotificationCenterProps {
   className?: string;
 }
 
 export function NotificationCenter({ className }: NotificationCenterProps) {
-  const [notifications, setNotifications] =
-    useState<Notification[]>(mockNotifications);
+  const [notifications, setNotifications] = useState<UserNotification[]>([]);
+  const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const markAsRead = useCallback((notificationId: string) => {
+  const fetchNotifications = useCallback(async (showError = false) => {
+    const response = await getBellNotifications();
+    if (response.success && response.content) {
+      setNotifications(response.content.notifications || []);
+    } else if (showError) {
+      showApiToast(
+        response.type ?? "error",
+        response.message || "Unable to load notifications",
+      );
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    fetchNotifications();
+
+    const intervalId = window.setInterval(
+      () => fetchNotifications(),
+      BELL_REFRESH_INTERVAL_MS,
+    );
+
+    return () => window.clearInterval(intervalId);
+  }, [fetchNotifications]);
+
+  const markAsRead = useCallback(async (notificationId: number) => {
     startTransition(() => {
       setNotifications((prev) =>
         prev.map((notification) =>
           notification.id === notificationId
-            ? { ...notification, isRead: true }
+            ? { ...notification, read: true, read_at: notification.read_at || "now" }
             : notification,
         ),
       );
     });
+
+    const response = await markNotificationAsRead(notificationId);
+    if (!response.success) {
+      showApiToast(response.type ?? "error", response.message);
+    }
   }, []);
 
-  const markAllAsRead = useCallback(() => {
+  const markAllAsRead = useCallback(async () => {
     startTransition(() => {
       setNotifications((prev) =>
-        prev.map((notification) => ({ ...notification, isRead: true })),
+        prev.map((notification) => ({
+          ...notification,
+          read: true,
+          read_at: notification.read_at || "now",
+        })),
       );
     });
+
+    const response = await markAllNotificationsAsRead();
+    if (!response.success) {
+      showApiToast(response.type ?? "error", response.message);
+    }
   }, []);
 
-  const removeNotification = useCallback((notificationId: string) => {
+  const removeNotification = useCallback(async (notificationId: number) => {
+    const previousNotifications = notifications;
     startTransition(() => {
       setNotifications((prev) =>
         prev.filter((notification) => notification.id !== notificationId),
       );
     });
-  }, []);
 
-  const clearAllNotifications = useCallback(() => {
+    const response = await deleteNotification(notificationId);
+    if (!response.success) {
+      setNotifications(previousNotifications);
+      showApiToast(response.type ?? "error", response.message);
+    }
+  }, [notifications]);
+
+  const clearShownNotifications = useCallback(async () => {
+    const notificationIds = notifications.map((notification) => notification.id);
+    if (notificationIds.length === 0) return;
+
+    const previousNotifications = notifications;
     startTransition(() => {
       setNotifications([]);
     });
-  }, []);
 
-  const formatTimeAgo = (timestamp: Date) => {
-    const now = new Date();
-    const diff = now.getTime() - timestamp.getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
+    const responses = await Promise.all(
+      notificationIds.map((notificationId) => deleteNotification(notificationId)),
+    );
 
-    if (days > 0) return `${days}d ago`;
-    if (hours > 0) return `${hours}h ago`;
-    if (minutes > 0) return `${minutes}m ago`;
-    return "Just now";
+    if (responses.some((response) => !response.success)) {
+      setNotifications(previousNotifications);
+      showApiToast("error", "Some notifications could not be deleted");
+    }
+  }, [notifications]);
+
+  const getNotificationIcon = (read: boolean) => {
+    return read ? (
+      <Check className="size-4 text-green-600" />
+    ) : (
+      <Bell className="size-4 text-primary" />
+    );
   };
 
-  const getNotificationIcon = (type: Notification["type"]) => {
-    switch (type) {
-      case "success":
-        return <Check className="size-4 text-green-600" />;
-      case "warning":
-        return <X className="size-4 text-yellow-600" />;
-      case "error":
-        return <X className="size-4 text-red-600" />;
-      default:
-        return <Bell className="size-4 text-blue-600" />;
-    }
-  };
-
-  const getNotificationColors = (type: Notification["type"]) => {
-    switch (type) {
-      case "success":
-        return "border-l-green-500 bg-green-50 dark:bg-green-900/20";
-      case "warning":
-        return "border-l-yellow-500 bg-yellow-50 dark:bg-yellow-900/20";
-      case "error":
-        return "border-l-red-500 bg-red-50 dark:bg-red-900/20";
-      default:
-        return "border-l-blue-500 bg-blue-50 dark:bg-blue-900/20";
-    }
+  const getNotificationColors = (read: boolean) => {
+    return read
+      ? "border-l-muted bg-background"
+      : "border-l-primary bg-primary/5";
   };
 
   return (
@@ -190,7 +188,11 @@ export function NotificationCenter({ className }: NotificationCenterProps) {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
 
-        {notifications.length === 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="size-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : notifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-6 text-center">
             <Bell className="mb-2 size-8 text-muted-foreground/50" />
             <p className="text-sm text-muted-foreground">No notifications</p>
@@ -204,15 +206,15 @@ export function NotificationCenter({ className }: NotificationCenterProps) {
                     key={notification.id}
                     className={cn(
                       "responsive-padding group relative cursor-pointer border-l-2 text-left text-sm transition-colors hover:bg-muted/50",
-                      getNotificationColors(notification.type),
-                      !notification.isRead && "font-medium",
+                      getNotificationColors(notification.read),
+                      !notification.read && "font-medium",
                     )}
                     onClick={() =>
-                      !notification.isRead && markAsRead(notification.id)
+                      !notification.read && markAsRead(notification.id)
                     }
                   >
                     <div className="flex items-start space-x-2">
-                      {getNotificationIcon(notification.type)}
+                      {getNotificationIcon(notification.read)}
                       <div className="flex-1 space-y-1">
                         <div className="flex items-center justify-between">
                           <p className="text-sm font-medium leading-none sm:text-base">
@@ -235,10 +237,10 @@ export function NotificationCenter({ className }: NotificationCenterProps) {
                           {notification.message}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {formatTimeAgo(notification.timestamp)}
+                          {notification.created_at}
                         </p>
                       </div>
-                      {!notification.isRead && (
+                      {!notification.read && (
                         <div className="size-2 rounded-full bg-blue-600" />
                       )}
                     </div>
@@ -250,13 +252,20 @@ export function NotificationCenter({ className }: NotificationCenterProps) {
             {notifications.length > 0 && (
               <>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-center text-destructive hover:text-destructive"
-                  onClick={clearAllNotifications}
-                >
-                  <Trash2 className="mr-2 size-4" />
-                  Clear all notifications
-                </DropdownMenuItem>
+                <div className="flex items-center justify-between gap-2 p-2">
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link href="/dashboard/notifications">View all</Link>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive"
+                    onClick={clearShownNotifications}
+                  >
+                    <Trash2 className="mr-2 size-4" />
+                    Clear shown
+                  </Button>
+                </div>
               </>
             )}
           </>

@@ -152,6 +152,12 @@ export const sidebarLinks: SidebarNavItem[] = [
         title: "MOTDs",
         authorizeOnly: UserRole.SUPERADMIN,
       },
+      {
+        href: "/dashboard/superadmin/notifications",
+        icon: "bell",
+        title: "Notifications",
+        authorizeOnly: UserRole.SUPERADMIN,
+      },
       // ACCOUNT SECTION for students
       {
         href: "/dashboard/admin/billing",
@@ -221,6 +227,18 @@ export const sidebarLinks: SidebarNavItem[] = [
         href: "/dashboard/settings",
         icon: "settings",
         title: "Settings",
+        authorizeOnly: UserRole.GUARDIAN,
+      },
+      {
+        href: "/dashboard/notifications",
+        icon: "bell",
+        title: "Notifications",
+        authorizeOnly: UserRole.STUDENT,
+      },
+      {
+        href: "/dashboard/notifications",
+        icon: "bell",
+        title: "Notifications",
         authorizeOnly: UserRole.GUARDIAN,
       },
       // Role-specific settings

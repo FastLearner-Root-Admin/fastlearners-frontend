@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
-import { BookOpen, FolderCog, LayoutDashboard, Upload, Package, Ticket, Users, CreditCard } from "lucide-react";
+import { Bell, BookOpen, FolderCog, LayoutDashboard, Upload, Package, Ticket, Users, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -81,6 +81,12 @@ export default function SuperadminLayout({ children }: SuperadminLayoutProps) {
       icon: CreditCard,
       active: pathname.startsWith("/dashboard/superadmin/transactions"),
     },
+    {
+      href: "/dashboard/superadmin/notifications",
+      label: "Notifications",
+      icon: Bell,
+      active: pathname.startsWith("/dashboard/superadmin/notifications"),
+    },
   ];
 
   return (
@@ -96,7 +102,7 @@ export default function SuperadminLayout({ children }: SuperadminLayoutProps) {
           </p>
         </div>
 
-        <nav className="flex items-center space-x-2">
+        <nav className="flex items-center space-x-2 overflow-x-auto pb-1">
           {tabs.map((tab) => (
             <Link key={tab.href} href={tab.href}>
               <Button
