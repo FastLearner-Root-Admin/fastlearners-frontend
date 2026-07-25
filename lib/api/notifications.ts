@@ -35,21 +35,36 @@ function withJson(body: unknown): RequestInit {
 
 function unwrapUserNotificationPage(data: any) {
   const page = data?.content?.notifications;
-  if (Array.isArray(page?.notifications)) {
-    data.content = {
-      notifications: page.notifications,
-      links: page.links,
-      meta: page.meta,
-    };
-  }
+  const notifications = Array.isArray(page)
+    ? page
+    : Array.isArray(page?.notifications)
+      ? page.notifications
+      : Array.isArray(page?.data)
+        ? page.data
+        : Array.isArray(data?.content?.data)
+          ? data.content.data
+          : [];
+
+  data.content = {
+    notifications,
+    links: page?.links || data?.content?.links,
+    meta: page?.meta || data?.content?.meta,
+  };
+
   return data;
 }
 
 function unwrapBellNotifications(data: any) {
   const notifications = data?.content?.notifications;
-  if (Array.isArray(notifications)) {
-    data.content = { notifications };
-  }
+  data.content = {
+    notifications: Array.isArray(notifications)
+      ? notifications
+      : Array.isArray(notifications?.notifications)
+        ? notifications.notifications
+        : Array.isArray(notifications?.data)
+          ? notifications.data
+          : [],
+  };
   return data;
 }
 
@@ -70,6 +85,27 @@ function unwrapNotificationTypes(data: any) {
     data?.content?.notificationTypes ||
     [];
   data.content = { types: Array.isArray(types) ? types : [] };
+  return data;
+}
+
+function unwrapAdminNotificationPage(data: any) {
+  const source = data?.content?.notifications;
+  const notifications = Array.isArray(source)
+    ? source
+    : Array.isArray(source?.notifications)
+      ? source.notifications
+      : Array.isArray(source?.data)
+        ? source.data
+        : Array.isArray(data?.content?.data)
+          ? data.content.data
+          : [];
+
+  data.content = {
+    notifications,
+    links: source?.links || data?.content?.links,
+    meta: source?.meta || data?.content?.meta,
+  };
+
   return data;
 }
 
@@ -120,7 +156,7 @@ export async function getUnreadNotifications(
 
 export async function markNotificationAsRead(id: number): Promise<ApiResponse<null>> {
   try {
-    const res = await fetch(`/api/proxy/notification/${id}/mark-as-read`, {
+    const res = await fetch(`/api/proxy/notifications/${id}/mark-as-read`, {
       method: "POST",
       headers: { Accept: "application/json" },
       credentials: "include",
@@ -133,7 +169,7 @@ export async function markNotificationAsRead(id: number): Promise<ApiResponse<nu
 
 export async function markAllNotificationsAsRead(): Promise<ApiResponse<null>> {
   try {
-    const res = await fetch("/api/proxy/notification/mark-all-as-read", {
+    const res = await fetch("/api/proxy/notifications/mark-all-as-read", {
       method: "POST",
       headers: { Accept: "application/json" },
       credentials: "include",
@@ -166,16 +202,7 @@ export async function adminGetNotifications(): Promise<
       headers: { Accept: "application/json" },
       credentials: "include",
     });
-    const data = await res.json();
-    const notifications = data?.content?.notifications;
-    if (Array.isArray(notifications)) {
-      data.content = {
-        notifications,
-        links: data.content.links,
-        meta: data.content.meta,
-      };
-    }
-    return data;
+    return unwrapAdminNotificationPage(await res.json());
   } catch (error: any) {
     return apiError(error, "Failed to fetch admin notifications");
   }

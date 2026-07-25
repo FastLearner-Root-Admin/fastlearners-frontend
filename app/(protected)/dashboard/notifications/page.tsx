@@ -82,6 +82,8 @@ export default function NotificationsPage() {
   }
 
   async function handleMarkAllAsRead() {
+    if (!notifications.some((notification) => !notification.read)) return;
+
     const response = await markAllNotificationsAsRead();
     if (response.success) {
       setNotifications((prev) =>
@@ -147,7 +149,12 @@ export default function NotificationsPage() {
           >
             Unread
           </Button>
-          <Button variant="outline" className="gap-2" onClick={handleMarkAllAsRead}>
+          <Button
+            variant="outline"
+            className="gap-2"
+            disabled={!notifications.some((notification) => !notification.read)}
+            onClick={handleMarkAllAsRead}
+          >
             <CheckCheck className="size-4" />
             Mark all read
           </Button>
