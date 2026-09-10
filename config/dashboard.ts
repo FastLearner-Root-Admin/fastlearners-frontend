@@ -25,9 +25,9 @@ export const sidebarLinks: SidebarNavItem[] = [
         authorizeOnly: UserRole.STUDENT,
       },
       {
-        href: "/dashboard/quiz",
+        href: "/dashboard/quizzes",
         icon: "helpCircle",
-        title: "Quiz",
+        title: "Quiz Competition",
         authorizeOnly: UserRole.STUDENT,
       },
       {
@@ -144,6 +144,12 @@ export const sidebarLinks: SidebarNavItem[] = [
         href: "/dashboard/superadmin/tickets",
         icon: "ticket",
         title: "Tickets",
+        authorizeOnly: UserRole.SUPERADMIN,
+      },
+      {
+        href: "/dashboard/superadmin/quizzes",
+        icon: "helpCircle",
+        title: "Quiz Competitions",
         authorizeOnly: UserRole.SUPERADMIN,
       },
       {

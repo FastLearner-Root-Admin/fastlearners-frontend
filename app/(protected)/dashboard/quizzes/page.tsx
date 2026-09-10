@@ -1,647 +1,192 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
-import mockQuizData from "@/data/mock-quizzes.json";
-import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   AlertCircle,
   Award,
-  BookOpen,
   Calendar,
-  CheckCircle,
-  Circle,
-  Clock,
-  HelpCircle,
-  Play,
-  RotateCcw,
-  Search,
-  Star,
-  Target,
-  TrendingUp,
+  GraduationCap,
+  History,
+  MapPin,
   Trophy,
+  Unlock,
   Users,
 } from "lucide-react";
 
-import { getSubjectById, getSubjects } from "@/config/education";
-import { Badge } from "@/components/ui/badge";
+import {
+  getQuizCompetitions,
+  getQuizDashboard,
+} from "@/lib/api/quiz-competition";
+import { QuizCompetition, QuizDashboardUser } from "@/lib/types/quiz-competition";
+import { getCompetitionStatusBadge } from "@/lib/utils/quiz-status";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AcademicSelector } from "@/components/dashboard/student/shared/academic-selector";
-import {
-  useAcademicContext,
-  useAcademicDisplay,
-} from "@/components/providers/academic-context";
-import { CompetitorsList } from "@/components/quiz/CompetitorsList";
-import { Leaderboard } from "@/components/quiz/Leaderboard";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyPlaceholder } from "@/components/shared/empty-placeholder";
+import { OverviewGrid } from "@/components/dashboard/OverviewGrid";
 
-// Types
-interface Quiz {
-  id: string;
-  title: string;
-  description: string;
-  subjectId: string;
-  subjectName?: string;
-  classLevel: string;
-  term: string;
-  difficulty: "easy" | "medium" | "hard";
-  scope: "topic" | "multi-topic" | "midterm" | "final";
-  timeLimit: number;
-  totalQuestions: number;
-  totalPoints: number;
-  passingScore: number;
-  maxAttempts: number;
-  isAvailable: boolean;
-  dueDate?: string;
-  instructions: string;
-  createdAt: string;
-  updatedAt: string;
-  questions: any[];
-  attempts?: any[];
-}
+export default function QuizCompetitionsPage() {
+  const [user, setUser] = useState<QuizDashboardUser | null>(null);
+  const [competitions, setCompetitions] = useState<QuizCompetition[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-interface QuizCardProps {
-  quiz: Quiz;
-  onClick: () => void;
-}
+  useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const [dashboardRes, competitionsRes] = await Promise.all([
+          getQuizDashboard(),
+          getQuizCompetitions(),
+        ]);
 
-function QuizCard({ quiz, onClick }: QuizCardProps) {
-  const subject = getSubjectById(quiz.subjectId);
-  const isCompleted = false; // TODO: Get from user attempts
-  const attemptsLeft = quiz.maxAttempts === 0 ? "Unlimited" : quiz.maxAttempts;
+        if (dashboardRes.success && dashboardRes.content) {
+          setUser(dashboardRes.content.user);
+        }
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case "easy":
-        return "text-green-600 bg-green-50 border-green-200";
-      case "medium":
-        return "text-yellow-600 bg-yellow-50 border-yellow-200";
-      case "hard":
-        return "text-red-600 bg-red-50 border-red-200";
-      default:
-        return "text-gray-600 bg-gray-50 border-gray-200";
+        if (competitionsRes.success && competitionsRes.content) {
+          setCompetitions(competitionsRes.content.quiz_competition || []);
+        } else if (competitionsRes.code !== 200) {
+          setError(
+            competitionsRes.message || "Failed to load quiz competitions.",
+          );
+        }
+      } catch (err) {
+        setError("An unexpected error occurred.");
+      } finally {
+        setIsLoading(false);
+      }
     }
-  };
 
-  const getScopeColor = (scope: string) => {
-    switch (scope) {
-      case "topic":
-        return "text-blue-600 bg-blue-50";
-      case "multi-topic":
-        return "text-purple-600 bg-purple-50";
-      case "midterm":
-        return "text-orange-600 bg-orange-50";
-      case "final":
-        return "text-red-600 bg-red-50";
-      default:
-        return "text-gray-600 bg-gray-50";
-    }
-  };
+    fetchData();
+  }, []);
 
   return (
-    <motion.div
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      className="cursor-pointer"
-    >
-      <Card className="h-full transition-shadow hover:shadow-md">
-        <CardHeader className="p-component-sm pb-2 sm:p-component-md sm:pb-3">
-          <div className="flex items-start justify-between">
-            <div className="flex flex-1 items-center gap-2 sm:gap-3">
-              <div
-                className="flex shrink-0 items-center justify-center rounded-lg p-1.5 sm:p-2"
-                style={{ backgroundColor: `${subject?.color || "#6B7280"}20` }}
-              >
-                <HelpCircle
-                  className="size-4 sm:size-5"
-                  style={{ color: subject?.color || "#6B7280" }}
-                />
-              </div>
-              <div className="min-w-0 flex-1">
-                <CardTitle className="mb-1 text-sm leading-tight sm:text-base">
-                  {quiz.title}
-                </CardTitle>
-                <CardDescription className="line-clamp-2 text-xs sm:text-sm">
-                  {quiz.description}
-                </CardDescription>
-              </div>
-            </div>
-            {isCompleted ? (
-              <CheckCircle className="size-4 shrink-0 text-green-600 sm:size-5" />
-            ) : (
-              <Circle className="size-4 shrink-0 text-muted-foreground sm:size-5" />
-            )}
+    <div className="container mx-auto space-y-6 px-4 py-6 sm:px-6 sm:py-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="flex items-center gap-2 text-3xl font-bold tracking-tight">
+            <Trophy className="size-7 text-primary" />
+            Quiz Competition
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            Register for the Fast Learners National Quiz Competition (FLNQC).
+          </p>
+        </div>
+        <Button variant="outline" asChild>
+          <Link href="/dashboard/quizzes/history">
+            <History className="mr-2 size-4" />
+            My Registrations
+          </Link>
+        </Button>
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-6">
+          <Skeleton className="h-32 w-full rounded-lg" />
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-56 rounded-lg" />
+            ))}
           </div>
-        </CardHeader>
-
-        <CardContent className="space-y-component-xs p-component-sm pt-0 sm:space-y-component-sm sm:p-component-md">
-          {/* Quiz Details */}
-          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground sm:gap-3 sm:text-sm">
-            <div className="flex items-center gap-1">
-              <Clock className="size-3 sm:size-4" />
-              <span>
-                {quiz.timeLimit === 0 ? "No limit" : `${quiz.timeLimit} min`}
-              </span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Target className="size-3 sm:size-4" />
-              <span>{quiz.totalQuestions} questions</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Award className="size-3 sm:size-4" />
-              <span>{quiz.totalPoints} pts</span>
-            </div>
-          </div>
-
-          {/* Badges */}
-          <div className="flex flex-wrap gap-1 sm:gap-2">
-            <Badge
-              variant="outline"
-              className={`text-[10px] sm:text-xs ${getDifficultyColor(quiz.difficulty)}`}
-            >
-              {quiz.difficulty}
-            </Badge>
-            <Badge
-              variant="outline"
-              className={`text-[10px] sm:text-xs ${getScopeColor(quiz.scope)}`}
-            >
-              {quiz.scope}
-            </Badge>
-            {quiz.dueDate && (
-              <Badge
-                variant="outline"
-                className="bg-red-50 text-[10px] text-red-600 sm:text-xs"
-              >
-                Due {new Date(quiz.dueDate).toLocaleDateString()}
-              </Badge>
-            )}
-          </div>
-
-          {/* Score/Attempts Info */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Passing Score</span>
-              <span>{quiz.passingScore}%</span>
-            </div>
-            <div className="text-xs text-muted-foreground">
-              Attempts: {attemptsLeft}
-            </div>
-          </div>
-
-          {/* Action Button */}
-          <div className="flex items-center justify-between pt-2">
-            <div className="text-xs text-muted-foreground">
-              {subject?.name || quiz.subjectName}
-            </div>
-            <Button
-              size="sm"
-              onClick={onClick}
-              disabled={!quiz.isAvailable}
-              className="ml-2"
-            >
-              {!quiz.isAvailable ? (
-                "Not Available"
-              ) : isCompleted ? (
-                <>
-                  <RotateCcw className="mr-1 size-3" />
-                  Retake
-                </>
-              ) : (
-                <>
-                  <Play className="mr-1 size-3" />
-                  Start Quiz
-                </>
-              )}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
-}
-
-export default function QuizzesPage() {
-  const router = useRouter();
-  const { currentClass, currentTerm } = useAcademicContext();
-  const className = currentClass?.name;
-  const termName = currentTerm?.name;
-  const { classDisplay, termDisplay } = useAcademicDisplay();
-
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedSubject, setSelectedSubject] = useState<string>("all");
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
-  const [selectedScope, setSelectedScope] = useState<string>("all");
-  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
-  const [competitors, setCompetitors] = useState(mockQuizData.competitors);
-  const [leaderboard, setLeaderboard] = useState(mockQuizData.leaderboard);
-
-  // Load quizzes from mock data
-  useEffect(() => {
-    if (className && termName) {
-      const filteredQuizzes = mockQuizData.quizzes.filter(
-        (quiz) => quiz.classLevel === className && quiz.term === termName,
-      );
-      setQuizzes(filteredQuizzes as Quiz[]);
-    } else {
-      setQuizzes(mockQuizData.quizzes as Quiz[]);
-    }
-  }, [className, termName]);
-
-  // Get available subjects from quizzes
-  const availableSubjects = useMemo(() => {
-    const subjectIds = Array.from(
-      new Set(quizzes.map((quiz) => quiz.subjectId)),
-    );
-    return getSubjects().filter((subject) => subjectIds.includes(subject.id));
-  }, [quizzes]);
-
-  // Filter quizzes
-  const filteredQuizzes = useMemo(() => {
-    return quizzes.filter((quiz) => {
-      const matchesSearch =
-        quiz.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        quiz.description.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesSubject =
-        selectedSubject === "all" || quiz.subjectId === selectedSubject;
-      const matchesDifficulty =
-        selectedDifficulty === "all" || quiz.difficulty === selectedDifficulty;
-      const matchesScope =
-        selectedScope === "all" || quiz.scope === selectedScope;
-
-      return (
-        matchesSearch && matchesSubject && matchesDifficulty && matchesScope
-      );
-    });
-  }, [
-    quizzes,
-    searchQuery,
-    selectedSubject,
-    selectedDifficulty,
-    selectedScope,
-  ]);
-
-  // Get quiz statistics
-  const stats = useMemo(() => {
-    const total = quizzes.length;
-    const completed = quizzes.filter((q) => false).length; // TODO: Get from user attempts
-    const average = 0; // TODO: Calculate from user scores
-    return { total, completed, average };
-  }, [quizzes]);
-
-  const availableQuizzes = filteredQuizzes.filter((quiz) => quiz.isAvailable);
-  const completedQuizzes = filteredQuizzes.filter((q) => false); // TODO: Get from user attempts
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-    },
-  };
-
-  if (!currentClass || !currentTerm) {
-    return (
-      <div className="container py-6">
-        <Card>
-          <CardContent className="p-8 text-center">
-            <Calendar className="mx-auto mb-4 size-12 text-muted-foreground" />
-            <h3 className="mb-2 text-lg font-semibold">
-              Select Class and Term
-            </h3>
-            <p className="mb-4 text-muted-foreground">
-              Please select your class and term to view available quizzes.
-            </p>
-            <AcademicSelector variant="default" />
+        </div>
+      ) : error ? (
+        <Card className="border-destructive">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <AlertCircle className="mb-4 size-12 text-destructive" />
+            <p className="text-lg font-medium text-destructive">{error}</p>
           </CardContent>
         </Card>
-      </div>
-    );
-  }
-
-  return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="container space-y-6 pb-20"
-    >
-      {/* Header */}
-      <motion.div variants={itemVariants}>
-        <div className="mb-3 flex flex-col gap-3 sm:mb-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="flex items-center gap-2 text-xl font-bold sm:gap-3 sm:text-2xl lg:text-3xl">
-              <HelpCircle className="size-6 text-primary sm:size-7 lg:size-8" />
-              Quizzes & Assessments
-            </h1>
-            <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-              Test your knowledge for {classDisplay} - {termDisplay}
-            </p>
-          </div>
-          <AcademicSelector variant="compact" />
-        </div>
-      </motion.div>
-
-      {/* Stats Cards */}
-      <motion.div variants={itemVariants}>
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
-          <Card>
-            <CardContent className="p-3 sm:p-4">
-              <div className="mb-1 flex items-center gap-1 sm:mb-2 sm:gap-2">
-                <TrendingUp className="size-3 text-blue-600 sm:size-4" />
-                <span className="text-xs text-muted-foreground sm:text-sm">
-                  Total Quizzes
-                </span>
-              </div>
-              <p className="text-xl font-bold sm:text-2xl">{stats.total}</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-3 sm:p-4">
-              <div className="mb-1 flex items-center gap-1 sm:mb-2 sm:gap-2">
-                <Circle className="size-3 text-orange-600 sm:size-4" />
-                <span className="text-xs text-muted-foreground sm:text-sm">
-                  Available
-                </span>
-              </div>
-              <p className="text-xl font-bold sm:text-2xl">
-                {availableQuizzes.length}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-3 sm:p-4">
-              <div className="mb-1 flex items-center gap-1 sm:mb-2 sm:gap-2">
-                <CheckCircle className="size-3 text-green-600 sm:size-4" />
-                <span className="text-xs text-muted-foreground sm:text-sm">
-                  Completed
-                </span>
-              </div>
-              <p className="text-xl font-bold sm:text-2xl">{stats.completed}</p>
-              <p className="text-[10px] text-muted-foreground sm:text-xs">
-                {stats.total > 0
-                  ? Math.round((stats.completed / stats.total) * 100)
-                  : 0}
-                % complete
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-3 sm:p-4">
-              <div className="mb-1 flex items-center gap-1 sm:mb-2 sm:gap-2">
-                <Award className="size-3 text-yellow-600 sm:size-4" />
-                <span className="text-xs text-muted-foreground sm:text-sm">
-                  Avg Score
-                </span>
-              </div>
-              <p className="text-xl font-bold sm:text-2xl">
-                {stats.average > 0 ? `${stats.average}%` : "N/A"}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </motion.div>
-
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Left Column - Quizzes */}
-        <div className="space-y-6 lg:col-span-2">
-          {/* Filters */}
-          <motion.div variants={itemVariants}>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex flex-col gap-4 md:flex-row">
-                  <div className="flex-1">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-3 size-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Search quizzes..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-9"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-2 sm:flex-row">
-                    <Select
-                      value={selectedSubject}
-                      onValueChange={setSelectedSubject}
-                    >
-                      <SelectTrigger className="w-full sm:w-[180px]">
-                        <SelectValue placeholder="All Subjects" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Subjects</SelectItem>
-                        {availableSubjects.map((subject) => (
-                          <SelectItem key={subject.id} value={subject.id}>
-                            {subject.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-
-                    <Select
-                      value={selectedDifficulty}
-                      onValueChange={setSelectedDifficulty}
-                    >
-                      <SelectTrigger className="w-full sm:w-[150px]">
-                        <SelectValue placeholder="Difficulty" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Levels</SelectItem>
-                        <SelectItem value="easy">Easy</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="hard">Hard</SelectItem>
-                      </SelectContent>
-                    </Select>
-
-                    <Select
-                      value={selectedScope}
-                      onValueChange={setSelectedScope}
-                    >
-                      <SelectTrigger className="w-full sm:w-[150px]">
-                        <SelectValue placeholder="Scope" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Scopes</SelectItem>
-                        <SelectItem value="topic">Topic</SelectItem>
-                        <SelectItem value="multi-topic">Multi-topic</SelectItem>
-                        <SelectItem value="midterm">Midterm</SelectItem>
-                        <SelectItem value="final">Final</SelectItem>
-                      </SelectContent>
-                    </Select>
-
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => {
-                        setSearchQuery("");
-                        setSelectedSubject("all");
-                        setSelectedDifficulty("all");
-                        setSelectedScope("all");
-                      }}
-                      title="Clear filters"
-                    >
-                      <RotateCcw className="size-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Quizzes Content */}
-          <motion.div variants={itemVariants}>
-            <Tabs defaultValue="available" className="space-y-4">
-              <TabsList>
-                <TabsTrigger value="available">
-                  Available ({availableQuizzes.length})
-                </TabsTrigger>
-                <TabsTrigger value="completed">
-                  Completed ({completedQuizzes.length})
-                </TabsTrigger>
-                <TabsTrigger value="all">
-                  All Quizzes ({filteredQuizzes.length})
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="available" className="space-y-4">
-                {availableQuizzes.length > 0 ? (
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    {availableQuizzes.map((quiz) => (
-                      <QuizCard
-                        key={quiz.id}
-                        quiz={quiz}
-                        onClick={() =>
-                          router.push(`/dashboard/quizzes/${quiz.id}`)
-                        }
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <Card>
-                    <CardContent className="p-8 text-center">
-                      <HelpCircle className="mx-auto mb-4 size-12 text-muted-foreground" />
-                      <h3 className="mb-2 text-lg font-semibold">
-                        No Available Quizzes
-                      </h3>
-                      <p className="text-muted-foreground">
-                        There are no quizzes available for {classDisplay} -{" "}
-                        {termDisplay} at the moment.
-                      </p>
-                    </CardContent>
-                  </Card>
-                )}
-              </TabsContent>
-
-              <TabsContent value="completed" className="space-y-4">
-                {completedQuizzes.length > 0 ? (
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    {completedQuizzes.map((quiz) => (
-                      <QuizCard
-                        key={quiz.id}
-                        quiz={quiz}
-                        onClick={() =>
-                          router.push(`/dashboard/quizzes/${quiz.id}`)
-                        }
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <Card>
-                    <CardContent className="p-8 text-center">
-                      <CheckCircle className="mx-auto mb-4 size-12 text-muted-foreground" />
-                      <h3 className="mb-2 text-lg font-semibold">
-                        No Completed Quizzes
-                      </h3>
-                      <p className="text-muted-foreground">
-                        Complete a quiz to see it here
-                      </p>
-                    </CardContent>
-                  </Card>
-                )}
-              </TabsContent>
-
-              <TabsContent value="all" className="space-y-4">
-                {filteredQuizzes.length > 0 ? (
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    {filteredQuizzes.map((quiz) => (
-                      <QuizCard
-                        key={quiz.id}
-                        quiz={quiz}
-                        onClick={() =>
-                          router.push(`/dashboard/quizzes/${quiz.id}`)
-                        }
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <Card>
-                    <CardContent className="p-8 text-center">
-                      <HelpCircle className="mx-auto mb-4 size-12 text-muted-foreground" />
-                      <h3 className="mb-2 text-lg font-semibold">
-                        No Quizzes Found
-                      </h3>
-                      <p className="text-muted-foreground">
-                        {quizzes.length === 0
-                          ? `No quizzes available for ${classDisplay} - ${termDisplay}`
-                          : "Try adjusting your search or filters"}
-                      </p>
-                    </CardContent>
-                  </Card>
-                )}
-              </TabsContent>
-            </Tabs>
-          </motion.div>
-        </div>
-
-        {/* Right Column - Competitors & Leaderboard */}
-        <div className="space-y-6">
-          <motion.div variants={itemVariants}>
-            <CompetitorsList
-              competitors={competitors}
-              currentUserId="current-user"
+      ) : (
+        <>
+          {user && (
+            <OverviewGrid
+              title={`Welcome, ${user.name}`}
+              description="Your quiz profile at a glance"
+              stats={[
+                {
+                  label: "Class",
+                  value: user.class,
+                  icon: <GraduationCap className="size-4" />,
+                },
+                {
+                  label: "Location",
+                  value: user.location || "Not set",
+                  icon: <MapPin className="size-4" />,
+                },
+                {
+                  label: "Sponsor",
+                  value: user.sponsor || "Self",
+                  icon: <Users className="size-4" />,
+                },
+                {
+                  label: "Open for Registration",
+                  value: competitions.filter(
+                    (c) => c.status.toLowerCase() === "registration open",
+                  ).length,
+                  icon: <Unlock className="size-4" />,
+                },
+              ]}
             />
-          </motion.div>
+          )}
 
-          <motion.div variants={itemVariants}>
-            <Leaderboard
-              entries={leaderboard.slice(0, 10)}
-              currentUserId="current-user"
-            />
-          </motion.div>
-        </div>
-      </div>
-    </motion.div>
+          {competitions.length === 0 ? (
+            <EmptyPlaceholder>
+              <EmptyPlaceholder.Icon name="trophy" />
+              <EmptyPlaceholder.Title>
+                No quiz competitions available right now
+              </EmptyPlaceholder.Title>
+              <EmptyPlaceholder.Description>
+                Check back soon for the next FLNQC.
+              </EmptyPlaceholder.Description>
+            </EmptyPlaceholder>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {competitions.map((competition) => (
+                <Link
+                  key={competition.id}
+                  href={`/dashboard/quizzes/${competition.id}`}
+                  className="block"
+                >
+                  <Card className="h-full transition-shadow hover:shadow-md">
+                    <CardHeader className="space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <CardTitle className="text-lg leading-tight">
+                          {competition.title}
+                        </CardTitle>
+                        {getCompetitionStatusBadge(competition.status)}
+                      </div>
+                      <p className="line-clamp-2 text-sm text-muted-foreground">
+                        {competition.description}
+                      </p>
+                    </CardHeader>
+                    <CardContent className="space-y-2 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="size-4" />
+                        <span>Competition: {competition.competition_date}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="size-4" />
+                        <span>
+                          Registration closes {competition.registration_end_date}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Award className="size-4" />
+                        <span className="font-mono text-xs">
+                          {competition.competition_code}
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+    </div>
   );
 }

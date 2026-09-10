@@ -1,8 +1,0 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
-# Format code with Prettier (including Tailwind CSS class ordering)
-npx pretty-quick --staged
-
-# Run ESLint to catch any remaining issues
-npx lint-staged
