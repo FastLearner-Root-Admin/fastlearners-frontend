@@ -51,28 +51,9 @@ export function AppearanceForm() {
     defaultValues,
   });
 
-  function onSubmit(data: AppearanceFormValues) {
-    let changed = false;
-    if (data.font != font) {
-      setFont(data.font);
-      changed = true;
-    }
-    if (data.theme != theme) {
-      setTheme(data.theme);
-      changed = true;
-    }
-
-    if (changed) {
-      toast.success("Appearance settings updated.");
-    }
-  }
-
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-8 duration-500 animate-in fade-in-50"
-      >
+      <div className="space-y-8 duration-500 animate-in fade-in-50">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -98,7 +79,16 @@ export function AppearanceForm() {
                           "h-11 w-[240px] appearance-none px-4 text-base font-normal capitalize",
                           "bg-background hover:bg-muted/50 focus:ring-2 focus:ring-primary/20",
                         )}
-                        {...field}
+                        name={field.name}
+                        ref={field.ref}
+                        value={field.value}
+                        onBlur={field.onBlur}
+                        onChange={(e) => {
+                          const value = e.target.value as (typeof fonts)[number];
+                          field.onChange(value);
+                          setFont(value);
+                          toast.success("Font updated.");
+                        }}
                       >
                         {fonts.map((font) => (
                           <option key={font} value={font}>
@@ -140,6 +130,7 @@ export function AppearanceForm() {
                     onValueChange={(value) => {
                       field.onChange(value);
                       setTheme(value as "light" | "dark" | "system");
+                      toast.success("Theme updated.");
                     }}
                     defaultValue={field.value}
                     className="grid max-w-3xl grid-cols-1 gap-8 pt-4 md:grid-cols-3"
@@ -228,7 +219,7 @@ export function AppearanceForm() {
             />
           </CardContent>
         </Card>
-      </form>
+      </div>
     </Form>
   );
 }

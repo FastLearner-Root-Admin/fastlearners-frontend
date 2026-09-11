@@ -32,7 +32,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { EmailVerificationGate } from "@/components/auth/email-verification-gate";
 
 // Password validation schema
 const passwordSchema = z
@@ -65,7 +64,6 @@ interface ChangePasswordFormProps {
 }
 
 export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
-  const [isVerified, setIsVerified] = useState(false);
   const [isChanging, setIsChanging] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -135,7 +133,7 @@ export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
 
   const passwordStrength = getPasswordStrength(newPassword);
 
-  const PasswordChangeForm = () => (
+  return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -149,13 +147,6 @@ export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
       </CardHeader>
 
       <CardContent className="space-y-6">
-        <Alert className="border-green-200 bg-green-50">
-          <CheckCircle className="size-4 text-green-600" />
-          <AlertDescription className="text-green-800">
-            Email verification complete. You can now change your password.
-          </AlertDescription>
-        </Alert>
-
         {/* Display error message if present */}
         {errorMessage && (
           <Alert className="border-red-200 bg-red-50">
@@ -343,15 +334,5 @@ export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
         </form>
       </CardContent>
     </Card>
-  );
-
-  return (
-    <EmailVerificationGate
-      onVerified={() => setIsVerified(true)}
-      title="Secure Password Change"
-      description="For your security, please verify your email address before changing your password."
-    >
-      <PasswordChangeForm />
-    </EmailVerificationGate>
   );
 }
