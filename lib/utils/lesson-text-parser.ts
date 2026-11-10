@@ -8,18 +8,27 @@ export interface TextSegment {
   color?: "blue" | "dark-brown" | "red";
 }
 
-// Match earliest open tag: *b, *i, *bi, *tcb, *tcd, *tcr
-const OPEN_TAG_RE = /\*(b|i|bi|tcb|tcd|tcr)(?=\s|[^a-z/]|$)/;
+// Match earliest open tag: *bi, *tcb, *tcd, *tcr, *b, *i
+// Longer alternatives MUST come first so "bi" wins over "b".
+// No lookahead — tags may appear directly adjacent to word characters (e.g. *bbillionsbo/).
+const OPEN_TAG_RE = /\*(bi|tcb|tcd|tcr|b|i)/;
 
 function tagToProps(tag: string): Partial<TextSegment> {
   switch (tag) {
-    case "b":   return { bold: true };
-    case "i":   return { italic: true };
-    case "bi":  return { bold: true, italic: true };
-    case "tcb": return { color: "blue" };
-    case "tcd": return { color: "dark-brown" };
-    case "tcr": return { color: "red" };
-    default:    return {};
+    case "b":
+      return { bold: true };
+    case "i":
+      return { italic: true };
+    case "bi":
+      return { bold: true, italic: true };
+    case "tcb":
+      return { color: "blue" };
+    case "tcd":
+      return { color: "dark-brown" };
+    case "tcr":
+      return { color: "red" };
+    default:
+      return {};
   }
 }
 
@@ -61,3 +70,24 @@ export function parseLessonText(raw: string): TextSegment[] {
   return segments;
 }
 
+/**
+ * If `raw` starts with an inline italic figure caption (*iFigure N: ...i/),
+ * returns the caption text and the remaining body text separately.
+ * Otherwise returns caption: null and body: raw.
+ *
+ * Example input: "*iFigure 3: 4 302 015 600i/ The H, T and O places..."
+ * Returns: { caption: "Figure 3: 4 302 015 600", body: " The H, T and O places..." }
+ */
+export function splitFigureCaption(raw: string): {
+  caption: string | null;
+  body: string;
+} {
+  if (!raw) return { caption: null, body: raw };
+  // Match *iFigure <digits>: ... i/ at the very start of the string
+  // Use non-greedy match ([\s\S]*?) so the caption can contain the letter 'i' without early termination
+  const m = raw.match(/^\*i(Figure\s+\d+:[\s\S]*?)i\//i);
+  if (!m) return { caption: null, body: raw };
+  const caption = m[1].trim();
+  const body = raw.slice(m[0].length);
+  return { caption, body };
+}

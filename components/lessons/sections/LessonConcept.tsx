@@ -21,7 +21,7 @@ import { DismissibleCard } from "@/components/ui/dismissible-card";
 
 import { AudioPlayer } from "../AudioPlayer";
 import { ExerciseCard } from "../ExerciseCard";
-import { StyledText } from "../StyledText";
+import { StyledDescriptionText, StyledText } from "../StyledText";
 
 interface LessonConceptProps {
   concept: Concept;
@@ -230,7 +230,11 @@ export const LessonConcept = React.memo(function LessonConcept({
   const renderItems = useMemo(() => {
     const descItems = concept.description || [];
     const items: Array<
-      | { type: "passage"; header: ConceptDescription; body: ConceptDescription }
+      | {
+          type: "passage";
+          header: ConceptDescription;
+          body: ConceptDescription;
+        }
       | { type: "caption"; item: ConceptDescription }
       | { type: "normal"; item: ConceptDescription }
     > = [];
@@ -415,9 +419,7 @@ export const LessonConcept = React.memo(function LessonConcept({
                       </div>
                     )}
                     {desc.description && (
-                      <p className="text-base leading-relaxed text-foreground">
-                        <StyledText text={desc.description} />
-                      </p>
+                      <StyledDescriptionText text={desc.description} />
                     )}
                     {resolveMediaUrl(desc.image_path) && (
                       <div className="my-2">
