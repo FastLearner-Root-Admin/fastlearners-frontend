@@ -354,7 +354,7 @@ export const LessonConcept = React.memo(function LessonConcept({
                       )}
                       {/* Passage body — italic */}
                       {body.description && (
-                        <p className="text-base italic leading-relaxed text-foreground">
+                        <p className="whitespace-pre-line text-base italic leading-relaxed text-foreground sm:text-lg">
                           <StyledText text={body.description} />
                         </p>
                       )}
@@ -394,7 +394,7 @@ export const LessonConcept = React.memo(function LessonConcept({
                   return (
                     <p
                       key={i}
-                      className="mt-1 text-center text-xs font-bold italic text-muted-foreground"
+                      className="my-2.5 text-center text-sm font-semibold italic text-foreground/85 dark:text-slate-200 sm:text-base"
                     >
                       <StyledText text={entry.item.heading ?? ""} />
                     </p>
@@ -433,7 +433,7 @@ export const LessonConcept = React.memo(function LessonConcept({
                           unoptimized
                         />
                         {hasInlineCaption && (
-                          <p className="mt-1 text-center text-xs font-bold italic text-muted-foreground">
+                          <p className="my-2.5 text-center text-sm font-semibold italic text-foreground/85 dark:text-slate-200 sm:text-base">
                             <StyledText text={nextEntry.item.heading ?? ""} />
                           </p>
                         )}

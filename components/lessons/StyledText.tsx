@@ -69,7 +69,7 @@ export function StyledReadText({ text, className }: StyledTextProps) {
 /**
  * Renders a concept description field.
  * If the text begins with an inline italic figure caption (*iFigure N: ...i/),
- * the caption is rendered on its own line (centered, small, italic) with the
+ * the caption is rendered on its own line (centered, legible size, italic) with the
  * body paragraph rendered separately beneath it — preventing the visual clash
  * where caption text runs flush into the following sentence.
  */
@@ -79,23 +79,32 @@ export function StyledDescriptionText({ text, className }: StyledTextProps) {
 
   if (caption) {
     return (
-      <>
-        <p className="mb-2 text-center text-xs font-bold italic text-muted-foreground">
+      <div className="space-y-3">
+        <p className="my-2.5 text-center text-sm font-semibold italic text-foreground/85 dark:text-slate-200 sm:text-base">
           <StyledText text={caption} />
         </p>
         {body.trim() && (
           <p
             className={cn(
-              "text-base leading-relaxed text-foreground",
+              "whitespace-pre-line text-base leading-relaxed text-foreground sm:text-lg",
               className,
             )}
           >
             <StyledText text={body.trim()} />
           </p>
         )}
-      </>
+      </div>
     );
   }
 
-  return <StyledText text={text} className={className} />;
+  return (
+    <p
+      className={cn(
+        "whitespace-pre-line text-base leading-relaxed text-foreground sm:text-lg",
+        className,
+      )}
+    >
+      <StyledText text={text} />
+    </p>
+  );
 }
