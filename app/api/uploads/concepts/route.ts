@@ -1,7 +1,3 @@
-// Allow up to 10 MB uploads (Next.js default is 4 MB)
-export const config = {
-  api: { bodyParser: { sizeLimit: "10mb" } },
-};
 
 import { NextRequest, NextResponse } from "next/server";
 
