@@ -52,3 +52,6 @@ debug-error.log
 fastlearners_*_documentation.md
 fastlearners_change_report.md
 docs/project_changelog.csv
+
+# whatsapp chat exports (contain sensitive data — never commit)
+/whatsapp/

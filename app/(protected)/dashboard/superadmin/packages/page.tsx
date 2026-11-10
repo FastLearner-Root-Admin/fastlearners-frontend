@@ -106,6 +106,7 @@ export default function PackagesPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
+              <TableHead>Type</TableHead>
               <TableHead>Amount</TableHead>
               <TableHead>Original Amount</TableHead>
               <TableHead>Billing Cycle</TableHead>
@@ -121,6 +122,7 @@ export default function PackagesPage() {
                   <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-[60px]" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-[60px]" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-[60px]" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-[60px]" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-[60px]" /></TableCell>
@@ -129,7 +131,7 @@ export default function PackagesPage() {
               ))
             ) : packages.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7}>
+                <TableCell colSpan={8}>
                   <Card className="mx-4 mt-4 border-2 border-dashed bg-transparent shadow-none">
                     <CardContent className="flex flex-col items-center justify-center py-10">
                       <PackageIcon className="mb-4 size-10 text-muted-foreground" />
@@ -148,6 +150,11 @@ export default function PackagesPage() {
                     >
                       {pkg.name}
                     </Link>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="capitalize">
+                      {pkg.type}
+                    </Badge>
                   </TableCell>
                   <TableCell>₦{Number(normalizeAmount(pkg.amount)).toLocaleString()}</TableCell>
                   <TableCell>

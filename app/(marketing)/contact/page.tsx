@@ -14,6 +14,7 @@ export default function ContactPage() {
   const [submitStatus, setSubmitStatus] = useState<
     "idle" | "success" | "error"
   >("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -29,14 +30,40 @@ export default function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitStatus("idle");
+    setErrorMessage("");
 
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        setSubmitStatus("success");
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          subject: "",
+          message: "",
+        });
+        setTimeout(() => setSubmitStatus("idle"), 6000);
+      } else {
+        setSubmitStatus("error");
+        setErrorMessage(
+          data.message || "Failed to send message. Please try again.",
+        );
+      }
+    } catch (err) {
+      setSubmitStatus("error");
+      setErrorMessage("Network error. Please try again later.");
+    } finally {
       setIsSubmitting(false);
-      setSubmitStatus("success");
-      setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
-
-      setTimeout(() => setSubmitStatus("idle"), 5000);
-    }, 1500);
+    }
   };
 
   return (
@@ -180,7 +207,8 @@ export default function ContactPage() {
                 <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-4 text-destructive">
                   <p className="font-medium">Something went wrong!</p>
                   <p className="text-sm">
-                    Please try again or contact us directly via email.
+                    {errorMessage ||
+                      "Please try again or contact us directly via email."}
                   </p>
                 </div>
               )}

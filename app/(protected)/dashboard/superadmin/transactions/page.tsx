@@ -85,9 +85,18 @@ export default function TransactionsPage() {
       header: "Package",
     },
     {
-      accessorKey: "coupon_code",
-      header: "Coupon Code",
-      cell: ({ row }) => row.original.coupon_code || "-",
+      accessorKey: "package_type",
+      header: "Type",
+      cell: ({ row }) => (
+        <Badge variant="outline" className="capitalize">
+          {row.original.package_type}
+        </Badge>
+      ),
+    },
+    {
+      id: "coupon_or_voucher",
+      header: "Coupon / Voucher",
+      cell: ({ row }) => row.original.coupon_code || row.original.voucher_code || "-",
     },
     {
       accessorKey: "reference",
@@ -183,6 +192,7 @@ export default function TransactionsPage() {
                   <TableCell><Skeleton className="h-4 w-[20px]" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-[120px]" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-[70px]" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>

@@ -17,6 +17,7 @@ import { ModeToggle } from "@/components/layout/mode-toggle";
 import { UserAccountNav } from "@/components/layout/user-account-nav";
 import { NetworkStatus } from "@/components/navigation/network-status";
 import { NotificationCenter } from "@/components/navigation/notification-center";
+import { ProfileGate } from '@/components/auth/ProfileGate';
 import { ProfileCompletionBanner } from "@/components/onboarding/profile-completion-banner";
 import { AcademicProvider } from "@/components/providers/academic-context";
 
@@ -106,7 +107,7 @@ export default function Dashboard({ children }: ProtectedLayoutProps) {
 
             <main className="min-w-0 flex-1 overflow-x-hidden px-component-sm pb-control-lg pt-component-sm sm:px-component-md sm:pb-16 sm:pt-component-md xl:px-component-lg">
               <div className="responsive-gap flex size-full min-w-0 max-w-full flex-col overflow-x-hidden">
-                {children}
+                <ProfileGate>{children}</ProfileGate>
               </div>
             </main>
           </div>

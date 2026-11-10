@@ -129,6 +129,18 @@ export const sidebarLinks: SidebarNavItem[] = [
         authorizeOnly: UserRole.SUPERADMIN,
       },
       {
+        href: "/dashboard/superadmin/sponsors",
+        icon: "gift",
+        title: "Sponsors",
+        authorizeOnly: UserRole.SUPERADMIN,
+      },
+      {
+        href: "/dashboard/superadmin/vouchers",
+        icon: "qrCode",
+        title: "Vouchers",
+        authorizeOnly: UserRole.SUPERADMIN,
+      },
+      {
         href: "/dashboard/superadmin/subscriptions",
         icon: "users",
         title: "Subscriptions",

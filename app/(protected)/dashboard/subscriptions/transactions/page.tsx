@@ -177,10 +177,10 @@ export default function TransactionsPage() {
       ),
     },
     {
-      accessorKey: "coupon",
-      header: "Coupon Code",
+      id: "coupon_or_voucher",
+      header: "Coupon / Voucher",
       cell: ({ row }) => {
-        const code = row.original.coupon;
+        const code = row.original.coupon || row.original.voucher;
         return code ? (
           <span className="font-mono text-xs">{code}</span>
         ) : (

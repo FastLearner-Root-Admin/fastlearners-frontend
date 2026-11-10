@@ -13,6 +13,7 @@ import { getSubscriptionHistory } from "@/lib/api/subscription";
 import { Subscription } from "@/lib/types/subscription";
 import { getSubscriptionStatusBadge } from "@/lib/utils/subscription-status";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -52,6 +53,15 @@ const columns: ColumnDef<Subscription>[] = [
     header: "Package",
     cell: ({ row }) => (
       <span className="font-medium">{row.original.package}</span>
+    ),
+  },
+  {
+    accessorKey: "package_type",
+    header: "Type",
+    cell: ({ row }) => (
+      <Badge variant="outline" className="capitalize">
+        {row.original.package_type}
+      </Badge>
     ),
   },
   {

@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 import { selectConceptScore, useLessonsStore } from "@/lib/store/lessons";
-import { Concept } from "@/lib/types/lessons";
+import { Concept, ConceptDescription } from "@/lib/types/lessons";
 import { cn } from "@/lib/utils";
 import { resolveMediaUrl } from "@/lib/utils/media";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,7 @@ import { DismissibleCard } from "@/components/ui/dismissible-card";
 
 import { AudioPlayer } from "../AudioPlayer";
 import { ExerciseCard } from "../ExerciseCard";
+import { StyledText } from "../StyledText";
 
 interface LessonConceptProps {
   concept: Concept;
@@ -71,7 +72,7 @@ const ExampleCard = React.memo(
                 >
                   <div className="rounded-lg border-2 bg-background p-4 shadow-sm">
                     <p className="font-semibold text-foreground">
-                      {example.problem}
+                      <StyledText text={example.problem} />
                     </p>
                   </div>
                 </motion.div>
@@ -98,7 +99,9 @@ const ExampleCard = React.memo(
                           <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-emerald-200 text-xs font-bold text-emerald-900 dark:bg-emerald-800 dark:text-emerald-100">
                             {i + 1}
                           </span>
-                          <span>{step}</span>
+                          <span>
+                            <StyledText text={step} />
+                          </span>
                         </li>
                       ))}
                     </ol>
@@ -109,7 +112,8 @@ const ExampleCard = React.memo(
                   )}
                   <div className="mt-3 rounded-lg bg-emerald-200 px-4 py-3 dark:bg-emerald-800/50">
                     <p className="text-sm font-bold text-emerald-900 dark:text-emerald-100">
-                      <span className="mr-2">✓</span>Answer: {example.answer}
+                      <span className="mr-2">✓</span>Answer:{" "}
+                      <StyledText text={example.answer} />
                     </p>
                   </div>
                   {resolveMediaUrl(example.image_path) && (
@@ -222,6 +226,41 @@ export const LessonConcept = React.memo(function LessonConcept({
     fetchConceptScore(concept.id);
   }, [concept.id, fetchConceptScore]);
 
+  // Passage and Figure Caption grouping logic
+  const renderItems = useMemo(() => {
+    const descItems = concept.description || [];
+    const items: Array<
+      | { type: "passage"; header: ConceptDescription; body: ConceptDescription }
+      | { type: "caption"; item: ConceptDescription }
+      | { type: "normal"; item: ConceptDescription }
+    > = [];
+
+    let idx = 0;
+    while (idx < descItems.length) {
+      const item = descItems[idx];
+      const isPassage = /^Passage\s+\d+/i.test(item.heading ?? "");
+      const isFigureCaption =
+        /^Figure\s+\d+:/i.test(item.heading ?? "") &&
+        (!item.description || item.description.trim() === "");
+
+      if (isPassage && idx + 1 < descItems.length) {
+        items.push({
+          type: "passage",
+          header: item,
+          body: descItems[idx + 1],
+        });
+        idx += 2;
+      } else if (isFigureCaption) {
+        items.push({ type: "caption", item });
+        idx += 1;
+      } else {
+        items.push({ type: "normal", item });
+        idx += 1;
+      }
+    }
+    return items;
+  }, [concept.description]);
+
   return (
     <div className="flex h-full min-w-0 flex-col gap-6 overflow-y-auto overflow-x-hidden p-1">
       <DismissibleCard
@@ -281,62 +320,152 @@ export const LessonConcept = React.memo(function LessonConcept({
 
         {isExpanded && (
           <CardContent className="space-y-8 p-4 sm:p-6">
-            {/* Description */}
+            {/* Description / Content Section */}
             <div className="space-y-6">
-              {(concept.description || []).map((desc, i) => (
-                <div key={i} className="space-y-3">
-                  {desc.heading && (
-                    <div className="flex items-center gap-2">
-                      <BookOpen className="size-5 text-primary" />
-                      <h4 className="text-xl font-bold text-foreground">
-                        {desc.heading}
-                      </h4>
+              {renderItems.map((entry, i) => {
+                if (entry.type === "passage") {
+                  const { header, body } = entry;
+                  return (
+                    <div
+                      key={i}
+                      className="space-y-3 rounded-xl border-2 border-amber-300 bg-amber-50/60 p-5 dark:border-amber-700/40 dark:bg-amber-900/15"
+                    >
+                      {/* Passage N — main header */}
+                      {header.heading && (
+                        <h3 className="text-xl font-bold text-amber-900 dark:text-amber-200">
+                          <StyledText text={header.heading} />
+                        </h3>
+                      )}
+                      {/* Short intro text — italics */}
+                      {header.description && (
+                        <p className="text-sm italic text-amber-800 dark:text-amber-300">
+                          <StyledText text={header.description} />
+                        </p>
+                      )}
+                      {/* Passage title — subheading, bold-italic */}
+                      {body.heading && (
+                        <h4 className="text-base font-bold italic text-foreground">
+                          <StyledText text={body.heading} />
+                        </h4>
+                      )}
+                      {/* Passage body — italic */}
+                      {body.description && (
+                        <p className="text-base italic leading-relaxed text-foreground">
+                          <StyledText text={body.description} />
+                        </p>
+                      )}
+                      {/* Images and audio for the body, if any */}
+                      {resolveMediaUrl(body.image_path) && (
+                        <div className="my-2">
+                          <Image
+                            src={resolveMediaUrl(body.image_path) ?? ""}
+                            alt={body.heading || "Passage illustration"}
+                            width={800}
+                            height={450}
+                            className="h-auto w-full max-w-full rounded-lg object-contain"
+                            style={{ width: "100%", height: "auto" }}
+                            unoptimized
+                          />
+                        </div>
+                      )}
+                      {body.audio_path && (
+                        <AudioPlayer
+                          src={body.audio_path}
+                          title="Pronunciation / Audio"
+                          className="my-3 border-2"
+                        />
+                      )}
                     </div>
-                  )}
-                  {desc.description && (
-                    <p className="text-base leading-relaxed text-foreground">
-                      {desc.description}
+                  );
+                }
+
+                if (entry.type === "caption") {
+                  const prevEntry = renderItems[i - 1];
+                  const prevHadImage =
+                    prevEntry?.type === "normal" &&
+                    Boolean(resolveMediaUrl(prevEntry.item.image_path));
+                  // If preceded by a normal item with an image, it was rendered inline under the image
+                  if (prevHadImage) return null;
+
+                  return (
+                    <p
+                      key={i}
+                      className="mt-1 text-center text-xs font-bold italic text-muted-foreground"
+                    >
+                      <StyledText text={entry.item.heading ?? ""} />
                     </p>
-                  )}
-                  {resolveMediaUrl(desc.image_path) && (
-                    <div className="my-2">
-                      <Image
-                        src={resolveMediaUrl(desc.image_path) ?? ""}
-                        alt={desc.heading || "Concept illustration"}
-                        width={800}
-                        height={450}
-                        className="h-auto w-full max-w-full rounded-lg object-contain"
-                        style={{ width: "100%", height: "auto" }}
-                        unoptimized
+                  );
+                }
+
+                // Normal item
+                const desc = entry.item;
+                const nextEntry = renderItems[i + 1];
+                const hasInlineCaption =
+                  Boolean(resolveMediaUrl(desc.image_path)) &&
+                  nextEntry?.type === "caption";
+
+                return (
+                  <div key={i} className="space-y-3">
+                    {desc.heading && (
+                      <div className="flex items-center gap-2">
+                        <BookOpen className="size-5 text-primary" />
+                        <h4 className="text-xl font-bold text-foreground">
+                          <StyledText text={desc.heading} />
+                        </h4>
+                      </div>
+                    )}
+                    {desc.description && (
+                      <p className="text-base leading-relaxed text-foreground">
+                        <StyledText text={desc.description} />
+                      </p>
+                    )}
+                    {resolveMediaUrl(desc.image_path) && (
+                      <div className="my-2">
+                        <Image
+                          src={resolveMediaUrl(desc.image_path) ?? ""}
+                          alt={desc.heading || "Concept illustration"}
+                          width={800}
+                          height={450}
+                          className="h-auto w-full max-w-full rounded-lg object-contain"
+                          style={{ width: "100%", height: "auto" }}
+                          unoptimized
+                        />
+                        {hasInlineCaption && (
+                          <p className="mt-1 text-center text-xs font-bold italic text-muted-foreground">
+                            <StyledText text={nextEntry.item.heading ?? ""} />
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    {desc.audio_path && (
+                      <AudioPlayer
+                        src={desc.audio_path}
+                        title="Pronunciation / Audio"
+                        className="my-3 border-2"
                       />
-                    </div>
-                  )}
-                  {desc.audio_path && (
-                    <AudioPlayer
-                      src={desc.audio_path}
-                      title="Pronunciation / Audio"
-                      className="my-3 border-2"
-                    />
-                  )}
-                  {desc.points && desc.points.length > 0 && (
-                    <ul className="ml-6 space-y-2">
-                      {desc.points.map((point, j) => (
-                        <li
-                          key={j}
-                          className="flex items-start gap-2 text-sm text-foreground"
-                        >
-                          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" />
-                          <span>
-                            {typeof point === "string"
-                              ? point
-                              : JSON.stringify(point)}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              ))}
+                    )}
+                    {desc.points && desc.points.length > 0 && (
+                      <ul className="ml-6 space-y-2">
+                        {desc.points.map((point, j) => (
+                          <li
+                            key={j}
+                            className="flex items-start gap-2 text-sm text-foreground"
+                          >
+                            <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" />
+                            <span>
+                              {typeof point === "string" ? (
+                                <StyledText text={point} />
+                              ) : (
+                                JSON.stringify(point)
+                              )}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             {/* Examples (Windowed) */}
@@ -378,7 +507,7 @@ export const LessonConcept = React.memo(function LessonConcept({
               </div>
             )}
 
-            {/* Exercises (Existing logic) */}
+            {/* Exercises */}
             {concept.exercises.length > 0 ? (
               <div className="space-y-4">
                 <div className="flex items-center gap-2">

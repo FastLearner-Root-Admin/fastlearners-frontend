@@ -33,12 +33,12 @@ export const footerLinks: SidebarNavItem[] = [
       { title: "Privacy Policy", href: "/privacy-policy" },
       { title: "Pricing and Refund Policy", href: "/pricing-refund-policy" },
       { title: "Cookie Policy", href: "/cookie-policy" },
-      { title: "Data Breach Policy", href: "/data-breach-policy" },
     ],
   },
   {
     title: "Compliance",
     items: [
+      { title: "Data Breach Policy", href: "/data-breach-policy" },
       { title: "Data Processing Addendum", href: "/data-processing-addendum" },
       {
         title: "Children's Data Protection Policy",

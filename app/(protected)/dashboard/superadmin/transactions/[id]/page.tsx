@@ -137,19 +137,32 @@ export default function TransactionDetailPage({ params }: { params: { id: string
                 <p className="font-medium">{transaction.package}</p>
               </div>
               <div>
+                <p className="text-sm font-medium text-muted-foreground">Type</p>
+                <Badge variant="outline" className="mt-1 capitalize">
+                  {transaction.package_type}
+                </Badge>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
                 <p className="text-sm font-medium text-muted-foreground">Gateway</p>
                 <p className="font-medium capitalize">{transaction.gateway}</p>
               </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Reference</p>
                 <p className="font-medium">{transaction.reference}</p>
               </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Coupon Code</p>
                 <p className="font-medium">{transaction.coupon_code || "-"}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Voucher Code</p>
+                <p className="font-medium">{transaction.voucher_code || "-"}</p>
               </div>
             </div>
 

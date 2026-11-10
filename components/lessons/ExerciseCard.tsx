@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { AudioPlayer } from "./AudioPlayer";
+import { StyledReadText, StyledText } from "./StyledText";
 
 interface ExerciseCardProps {
   exercise: Exercise | GeneralExercise;
@@ -416,7 +417,7 @@ export function ExerciseCard({ exercise, index, onAnswer }: ExerciseCardProps) {
       <CardContent className="space-y-4">
         <div className="rounded-md bg-white p-3 shadow-sm dark:bg-slate-950 sm:p-4">
           <p className="text-sm font-medium leading-relaxed text-slate-800 dark:text-slate-200 sm:text-base">
-            {exercise.problem}
+            <StyledReadText text={exercise.problem} />
           </p>
         </div>
 
@@ -627,7 +628,7 @@ export function ExerciseCard({ exercise, index, onAnswer }: ExerciseCardProps) {
                     <>
                       <p className="text-sm text-slate-600 dark:text-slate-400">
                         The correct answer is:{" "}
-                        <strong>{exercise.correct_answer}</strong>
+                        <strong><StyledText text={exercise.correct_answer} /></strong>
                       </p>
                       {exercise.solution_steps &&
                         exercise.solution_steps.length > 0 && (
@@ -646,7 +647,7 @@ export function ExerciseCard({ exercise, index, onAnswer }: ExerciseCardProps) {
                             {showSolutionDetails && (
                               <ol className="mt-2 list-inside list-decimal space-y-1 text-sm text-slate-600 dark:text-slate-400">
                                 {exercise.solution_steps.map((step, idx) => (
-                                  <li key={idx}>{step}</li>
+                                  <li key={idx}><StyledText text={step} /></li>
                                 ))}
                               </ol>
                             )}

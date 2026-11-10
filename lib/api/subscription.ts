@@ -73,6 +73,62 @@ export async function verifyCoupon(
   }
 }
 
+export async function verifyVoucher(
+  packageId: number,
+  voucherCode: string
+): Promise<
+  ApiResponse<{
+    amount: string;
+    discount_amount: string;
+    payment_amount: string;
+  }>
+> {
+  try {
+    const res = await fetch("/api/proxy/subscriptions/verify-voucher", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({ package_id: packageId, voucher_code: voucherCode }),
+    });
+    return await res.json();
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message || "Failed to verify voucher",
+      content: null,
+      code: 500,
+    };
+  }
+}
+
+export async function subscribeWithVoucher(
+  packageId: number,
+  voucherCode: string
+): Promise<ApiResponse<null>> {
+  try {
+    const res = await fetch("/api/proxy/subscriptions/subscribe-with-voucher", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({ package_id: packageId, voucher_code: voucherCode }),
+    });
+    return await res.json();
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message || "Failed to subscribe with voucher",
+      content: null,
+      code: 500,
+    };
+  }
+}
+
 export async function subscribeToPackage(
   packageId: number,
   couponCode?: string

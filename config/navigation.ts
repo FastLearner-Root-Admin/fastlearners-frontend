@@ -500,6 +500,16 @@ export const roleNavigationConfig: Record<UserRole, RoleNavigationConfig> = {
             icon: "ticket",
             title: "Coupons",
           },
+          {
+            href: "/dashboard/superadmin/sponsors",
+            icon: "gift",
+            title: "Sponsors",
+          },
+          {
+            href: "/dashboard/superadmin/vouchers",
+            icon: "qrCode",
+            title: "Vouchers",
+          },
         ],
       },
       {

@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { getPackage, subscribeToPackage, verifyCoupon } from "@/lib/api/subscription";
+import {
+  getPackage,
+  subscribeToPackage,
+  subscribeWithVoucher,
+  verifyCoupon,
+  verifyVoucher,
+} from "@/lib/api/subscription";
 import { trackEvent } from "@/lib/analytics/posthog";
 import { Package } from "@/lib/types/subscription";
 import { PackageCard } from "@/components/subscription/package-card";
@@ -13,8 +19,8 @@ import { useParams, useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Tag, ArrowLeft } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Loader2, Tag, ArrowLeft, Gift } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const checkoutSchema = z.object({
@@ -36,6 +42,12 @@ export default function CheckoutPage() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [verifiedCoupon, setVerifiedCoupon] = useState<string | null>(null);
 
+  const [voucherCode, setVoucherCode] = useState("");
+  const [voucherBreakdown, setVoucherBreakdown] = useState<{ amount: string; discount_amount: string; payment_amount: string } | null>(null);
+  const [isVerifyingVoucher, setIsVerifyingVoucher] = useState(false);
+  const [verifiedVoucher, setVerifiedVoucher] = useState<string | null>(null);
+  const [isRedeemingVoucher, setIsRedeemingVoucher] = useState(false);
+
   const { register, handleSubmit, watch } = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
   });
@@ -48,6 +60,13 @@ export default function CheckoutPage() {
       setCouponVerified(false);
     }
   }, [couponCode, verifiedCoupon, couponVerified]);
+
+  useEffect(() => {
+    if (verifiedVoucher && voucherCode !== verifiedVoucher) {
+      setVoucherBreakdown(null);
+      setVerifiedVoucher(null);
+    }
+  }, [voucherCode, verifiedVoucher]);
 
   useEffect(() => {
     async function fetchPackage() {
@@ -111,6 +130,55 @@ export default function CheckoutPage() {
     }
   };
 
+  const handleVerifyVoucher = async () => {
+    if (!pkg) return;
+    if (!voucherCode) {
+      showApiToast("error", "Please enter a voucher code");
+      return;
+    }
+
+    setIsVerifyingVoucher(true);
+    try {
+      const response = await verifyVoucher(pkg.id, voucherCode);
+      if (response.success && response.content) {
+        setVoucherBreakdown(response.content);
+        setVerifiedVoucher(voucherCode);
+        showApiToast("success", "Voucher verified successfully");
+      } else {
+        setVoucherBreakdown(null);
+        setVerifiedVoucher(null);
+        showApiToast(response.type ?? "error", response.message || "Invalid voucher");
+      }
+    } catch (err) {
+      setVoucherBreakdown(null);
+      setVerifiedVoucher(null);
+      showApiToast("error", "An error occurred while verifying voucher");
+    } finally {
+      setIsVerifyingVoucher(false);
+    }
+  };
+
+  const handleRedeemVoucher = async () => {
+    if (!pkg || !verifiedVoucher) return;
+    setIsRedeemingVoucher(true);
+    try {
+      const response = await subscribeWithVoucher(pkg.id, verifiedVoucher);
+      if (response.success) {
+        showApiToast(
+          "success",
+          response.message || "Voucher redeemed — you're subscribed!"
+        );
+        router.push("/dashboard/subscriptions");
+      } else {
+        showApiToast(response.type ?? "error", response.message || "Failed to redeem voucher");
+      }
+    } catch (err) {
+      showApiToast("error", "An error occurred while redeeming voucher");
+    } finally {
+      setIsRedeemingVoucher(false);
+    }
+  };
+
   const onSubmit = async (data: CheckoutFormValues) => {
     if (!pkg) return;
     setIsSubmitting(true);
@@ -168,7 +236,7 @@ export default function CheckoutPage() {
         </Card>
       ) : (
         <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2">
+          <div className="space-y-6 lg:col-span-2">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -225,6 +293,74 @@ export default function CheckoutPage() {
                     )}
                   </Button>
                 </form>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Gift className="size-5" />
+                  Redeem a Voucher
+                </CardTitle>
+                <CardDescription>
+                  Have a sponsor-provided voucher code? Redeem it here for free access — no card required.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="voucher_code">Voucher Code</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="voucher_code"
+                      placeholder="e.g. 47H3H6EN"
+                      value={voucherCode}
+                      onChange={(e) => setVoucherCode(e.target.value)}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleVerifyVoucher}
+                      disabled={isVerifyingVoucher}
+                    >
+                      {isVerifyingVoucher ? <Loader2 className="size-4 animate-spin" /> : "Verify"}
+                    </Button>
+                  </div>
+                </div>
+
+                {voucherBreakdown && (
+                  <>
+                    <div className="space-y-2 rounded-md border bg-muted/50 p-4">
+                      <div className="flex justify-between">
+                        <span>Amount:</span>
+                        <span>₦{voucherBreakdown.amount}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Discount Amount:</span>
+                        <span>₦{voucherBreakdown.discount_amount}</span>
+                      </div>
+                      <div className="flex justify-between font-medium">
+                        <span>Payable Amount:</span>
+                        <span>₦{voucherBreakdown.payment_amount}</span>
+                      </div>
+                    </div>
+
+                    <Button
+                      type="button"
+                      className="w-full"
+                      disabled={isRedeemingVoucher}
+                      onClick={handleRedeemVoucher}
+                    >
+                      {isRedeemingVoucher ? (
+                        <>
+                          <Loader2 className="mr-2 size-4 animate-spin" />
+                          Redeeming...
+                        </>
+                      ) : (
+                        "Redeem Voucher"
+                      )}
+                    </Button>
+                  </>
+                )}
               </CardContent>
             </Card>
           </div>

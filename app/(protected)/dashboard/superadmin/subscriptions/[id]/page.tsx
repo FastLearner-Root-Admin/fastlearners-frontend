@@ -143,9 +143,17 @@ export default function SubscriptionDetailPage({ params }: { params: { id: strin
             <CardTitle>Subscription Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Package</p>
-              <p className="font-medium">{subscription.package}</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Package</p>
+                <p className="font-medium">{subscription.package}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Type</p>
+                <Badge variant="outline" className="mt-1 capitalize">
+                  {subscription.package_type}
+                </Badge>
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>

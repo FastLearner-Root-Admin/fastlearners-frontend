@@ -19,11 +19,18 @@ export function PackageCard({
   return (
     <Card className="flex h-full flex-col">
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <CardTitle className="text-xl">{pkg.name}</CardTitle>
-          <Badge variant="outline" className="capitalize">
-            {pkg.billing_cycle}
-          </Badge>
+          <div className="flex shrink-0 gap-2">
+            {pkg.type === "quiz" && (
+              <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-100/80">
+                Quiz Entry
+              </Badge>
+            )}
+            <Badge variant="outline" className="capitalize">
+              {pkg.billing_cycle}
+            </Badge>
+          </div>
         </div>
         {pkg.description && (
           <CardDescription className="mt-2 line-clamp-2">

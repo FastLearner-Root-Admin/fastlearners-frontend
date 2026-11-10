@@ -34,6 +34,7 @@ import {
 
 const packageSchema = z.object({
   name: z.string().min(1, "Name is required"),
+  type: z.enum(["subscription", "quiz"]),
   amount: z.string().min(1, "Amount is required"),
   original_amount: z.string().optional().nullable(),
   billing_cycle: z.enum(["monthly", "yearly"]),
@@ -62,6 +63,7 @@ export function PackageForm({
     resolver: zodResolver(packageSchema),
     defaultValues: {
       name: initialData?.name || "",
+      type: initialData?.type || "subscription",
       amount: normalizeAmount(initialData?.amount),
       original_amount: normalizeAmount(initialData?.original_amount),
       billing_cycle: initialData?.billing_cycle || "monthly",
@@ -75,6 +77,7 @@ export function PackageForm({
     try {
       const payload: CreatePackageData = {
         name: data.name,
+        type: data.type,
         amount: data.amount,
         billing_cycle: data.billing_cycle,
         duration_days: data.duration_days,
@@ -122,6 +125,27 @@ export function PackageForm({
               <FormControl>
                 <Input placeholder="e.g. Pro Monthly" {...field} />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="type"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Type</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a type" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="subscription">Subscription</SelectItem>
+                  <SelectItem value="quiz">Quiz</SelectItem>
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}

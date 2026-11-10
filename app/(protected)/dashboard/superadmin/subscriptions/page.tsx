@@ -87,6 +87,15 @@ export default function SubscriptionsPage() {
       header: "Package",
     },
     {
+      accessorKey: "package_type",
+      header: "Type",
+      cell: ({ row }) => (
+        <Badge variant="outline" className="capitalize">
+          {row.original.package_type}
+        </Badge>
+      ),
+    },
+    {
       accessorKey: "subscription_reference",
       header: "Subscription Reference",
     },
@@ -178,6 +187,7 @@ export default function SubscriptionsPage() {
                   <TableCell><Skeleton className="h-4 w-[120px]" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-[70px]" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>

@@ -1,9 +1,12 @@
 import { ApiResponse } from "@/lib/types/auth";
 
+export type PackageType = "subscription" | "quiz";
+
 export interface Package {
   id: number;
   name: string;
   slug: string;
+  type: PackageType;
   amount: string;
   original_amount: string | null;
   billing_cycle: "monthly" | "yearly";
@@ -17,6 +20,7 @@ export interface Package {
 export interface Subscription {
   id: number;
   package: string;
+  package_type: PackageType;
   reference: string;
   subscription_reference: string;
   starts_at: string;
@@ -26,10 +30,12 @@ export interface Subscription {
 }
 
 export type TransactionStatus = "success" | "failed" | "pending";
+export type PaymentMethod = "paystack" | "coupon" | "voucher";
 
 export interface BaseTransaction {
   id: number;
   package: string;
+  package_type: PackageType;
   reference: string;
   amount: string;
   discount_amount: string;
@@ -41,7 +47,9 @@ export interface BaseTransaction {
 
 export interface Transaction extends BaseTransaction {
   coupon: string | null;
+  voucher: string | null;
   payment_amount: string;
+  payment_method: PaymentMethod;
 }
 
 export interface PaymentStatusContent {
@@ -84,9 +92,43 @@ export interface AdminSubscription extends Subscription {
 
 export interface AdminTransaction extends BaseTransaction {
   coupon_code: string | null;
+  voucher_code: string | null;
   payment_amount: string;
   user_name: string;
   user_email: string;
+}
+
+export interface SponsorRef {
+  id: number;
+  name: string;
+  code: string;
+  email: string | null;
+  phone: string | null;
+  organization_name: string;
+}
+
+export interface Sponsor extends SponsorRef {
+  address: string | null;
+  description: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VoucherPackageRef {
+  id: number;
+  name: string;
+}
+
+export interface Voucher {
+  id: number;
+  code: string;
+  reference: string;
+  sponsor: SponsorRef;
+  package: VoucherPackageRef;
+  is_valid: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface PaginationLinks {
