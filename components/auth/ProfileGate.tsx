@@ -65,9 +65,7 @@ export function ProfileGate({ children }: ProfileGateProps) {
   }
 
   // Allow navigation to the profile edit/onboarding paths
-  const isAllowedPath = ALLOWED_PATHS.some((path) =>
-    pathname.startsWith(path),
-  );
+  const isAllowedPath = ALLOWED_PATHS.some((path) => pathname.startsWith(path));
 
   const handleNavigateToProfile = () => {
     // If onboarding exists, or direct to settings profile edit
@@ -109,7 +107,7 @@ export function ProfileGate({ children }: ProfileGateProps) {
 
             {missingFields.length > 0 && (
               <div className="space-y-2">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Missing Required Information ({missingFields.length}):
                 </p>
                 <div className="flex max-h-36 flex-wrap gap-1.5 overflow-y-auto rounded-lg border p-2">
@@ -145,4 +143,3 @@ export function ProfileGate({ children }: ProfileGateProps) {
     </>
   );
 }
-
