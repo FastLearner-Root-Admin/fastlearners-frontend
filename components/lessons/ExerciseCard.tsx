@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { AudioPlayer } from "./AudioPlayer";
+import { LessonImageViewer } from "./LessonImageViewer";
 import { StyledReadText, StyledText } from "./StyledText";
 
 interface ExerciseCardProps {
@@ -42,7 +43,7 @@ export function ExerciseCard({ exercise, index, onAnswer }: ExerciseCardProps) {
   const [showSolutionDetails, setShowSolutionDetails] = useState(false);
   const [shake, setShake] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+
   const [isOnline, setIsOnline] = useState(
     typeof window !== "undefined" ? navigator.onLine : true,
   );
@@ -361,15 +362,10 @@ export function ExerciseCard({ exercise, index, onAnswer }: ExerciseCardProps) {
   };
 
   const handleTryAgain = () => {
-    setShowConfirmDialog(true);
-  };
-
-  const confirmTryAgain = () => {
     setIsRevealed(false);
     setShowSolutionDetails(false);
     setSelectedOptionKey("");
     setFeedbackMessage("");
-    setShowConfirmDialog(false);
   };
 
   const formatTime = (seconds: number) => {
@@ -422,20 +418,13 @@ export function ExerciseCard({ exercise, index, onAnswer }: ExerciseCardProps) {
         </div>
 
         {resolveMediaUrl(exercise.image_path) && (
-          <div className="my-2">
-            <Image
-              src={resolveMediaUrl(exercise.image_path) ?? ""}
-              alt={
-                ("title" in exercise ? exercise.title : null) ||
-                "Exercise illustration"
-              }
-              width={800}
-              height={450}
-              className="h-auto w-full max-w-full rounded-lg object-contain"
-              style={{ width: "100%", height: "auto" }}
-              unoptimized
-            />
-          </div>
+          <LessonImageViewer
+            src={resolveMediaUrl(exercise.image_path) ?? ""}
+            alt={
+              ("title" in exercise ? exercise.title : null) ||
+              "Exercise illustration"
+            }
+          />
         )}
         {exercise.audio_path && (
           <AudioPlayer
@@ -628,7 +617,9 @@ export function ExerciseCard({ exercise, index, onAnswer }: ExerciseCardProps) {
                     <>
                       <p className="text-sm text-slate-600 dark:text-slate-400">
                         The correct answer is:{" "}
-                        <strong><StyledText text={exercise.correct_answer} /></strong>
+                        <strong>
+                          <StyledText text={exercise.correct_answer} />
+                        </strong>
                       </p>
                       {exercise.solution_steps &&
                         exercise.solution_steps.length > 0 && (
@@ -647,7 +638,9 @@ export function ExerciseCard({ exercise, index, onAnswer }: ExerciseCardProps) {
                             {showSolutionDetails && (
                               <ol className="mt-2 list-inside list-decimal space-y-1 text-sm text-slate-600 dark:text-slate-400">
                                 {exercise.solution_steps.map((step, idx) => (
-                                  <li key={idx}><StyledText text={step} /></li>
+                                  <li key={idx}>
+                                    <StyledText text={step} />
+                                  </li>
                                 ))}
                               </ol>
                             )}
@@ -669,29 +662,6 @@ export function ExerciseCard({ exercise, index, onAnswer }: ExerciseCardProps) {
             </div>
           )}
         </div>
-        {showConfirmDialog && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            <div className="mx-4 max-w-sm rounded-md bg-white p-4 dark:bg-slate-800">
-              <p className="mb-4 text-sm">
-                {isAlreadyCompleted
-                  ? "Are you sure you want to try again? This will just be for practice and won't affect your previously recorded score."
-                  : "Are you sure you want to try again? This will clear your current selection."}
-              </p>
-              <div className="flex gap-2">
-                <Button size="sm" onClick={confirmTryAgain}>
-                  Yes
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setShowConfirmDialog(false)}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

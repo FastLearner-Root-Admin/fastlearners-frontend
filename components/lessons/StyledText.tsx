@@ -24,7 +24,7 @@ export function StyledText({ text, className }: StyledTextProps) {
   const segments = parseLessonText(text);
 
   return (
-    <span className={className}>
+    <span className={cn("whitespace-pre-line", className)}>
       {segments.map((seg, i) => {
         const cls = cn(
           seg.bold && seg.italic

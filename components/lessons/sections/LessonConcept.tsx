@@ -21,6 +21,7 @@ import { DismissibleCard } from "@/components/ui/dismissible-card";
 
 import { AudioPlayer } from "../AudioPlayer";
 import { ExerciseCard } from "../ExerciseCard";
+import { LessonImageViewer } from "../LessonImageViewer";
 import { StyledDescriptionText, StyledText } from "../StyledText";
 
 interface LessonConceptProps {
@@ -117,17 +118,10 @@ const ExampleCard = React.memo(
                     </p>
                   </div>
                   {resolveMediaUrl(example.image_path) && (
-                    <div className="my-2">
-                      <Image
-                        src={resolveMediaUrl(example.image_path) ?? ""}
-                        alt={example.title || "Example illustration"}
-                        width={800}
-                        height={450}
-                        className="h-auto w-full max-w-full rounded-lg object-contain"
-                        style={{ width: "100%", height: "auto" }}
-                        unoptimized
-                      />
-                    </div>
+                    <LessonImageViewer
+                      src={resolveMediaUrl(example.image_path) ?? ""}
+                      alt={example.title || "Example illustration"}
+                    />
                   )}
                   {example.audio_path && (
                     <AudioPlayer
@@ -233,7 +227,9 @@ export const LessonConcept = React.memo(function LessonConcept({
       | {
           type: "passage";
           header: ConceptDescription;
+          passageTitle?: string;
           body: ConceptDescription;
+          extraMedia?: ConceptDescription;
         }
       | { type: "caption"; item: ConceptDescription }
       | { type: "normal"; item: ConceptDescription }
@@ -247,13 +243,44 @@ export const LessonConcept = React.memo(function LessonConcept({
         /^Figure\s+\d+:/i.test(item.heading ?? "") &&
         (!item.description || item.description.trim() === "");
 
-      if (isPassage && idx + 1 < descItems.length) {
-        items.push({
-          type: "passage",
-          header: item,
-          body: descItems[idx + 1],
-        });
-        idx += 2;
+      if (isPassage) {
+        const obj1 = item;
+        const obj2 = idx + 1 < descItems.length ? descItems[idx + 1] : null;
+        const obj3 = idx + 2 < descItems.length ? descItems[idx + 2] : null;
+
+        // Rule 2: If the 2nd object has a heading, but does not have description,
+        // then include the 3rd object (the 3rd object will not have a heading and holds the body).
+        const obj2HasHeadingNoDesc =
+          Boolean(obj2?.heading?.trim()) &&
+          (!obj2?.description || obj2.description.trim() === "");
+
+        if (obj2 && obj2HasHeadingNoDesc && obj3) {
+          items.push({
+            type: "passage",
+            header: obj1,
+            passageTitle: obj2.heading ?? undefined,
+            body: obj3,
+            extraMedia: obj2,
+          });
+          idx += 3;
+        } else if (obj2) {
+          // Rule 3: If 2nd object has both heading and description (or description),
+          // there is no need for the 3rd object in the card.
+          items.push({
+            type: "passage",
+            header: obj1,
+            passageTitle: obj2.heading ?? undefined,
+            body: obj2,
+          });
+          idx += 2;
+        } else {
+          items.push({
+            type: "passage",
+            header: obj1,
+            body: obj1,
+          });
+          idx += 1;
+        }
       } else if (isFigureCaption) {
         items.push({ type: "caption", item });
         idx += 1;
@@ -328,53 +355,55 @@ export const LessonConcept = React.memo(function LessonConcept({
             <div className="space-y-6">
               {renderItems.map((entry, i) => {
                 if (entry.type === "passage") {
-                  const { header, body } = entry;
+                  const { header, passageTitle, body, extraMedia } = entry;
+                  const imagePath = body.image_path || extraMedia?.image_path;
+                  const audioPath = body.audio_path || extraMedia?.audio_path;
+
+                  const displayTitle =
+                    passageTitle &&
+                    header.heading &&
+                    !header.heading
+                      .toLowerCase()
+                      .includes(passageTitle.toLowerCase())
+                      ? `${header.heading}: ${passageTitle}`
+                      : header.heading || passageTitle || "Passage";
+
                   return (
                     <div
                       key={i}
-                      className="space-y-3 rounded-xl border-2 border-amber-300 bg-amber-50/60 p-5 dark:border-amber-700/40 dark:bg-amber-900/15"
+                      className="space-y-4 rounded-xl border-2 border-amber-300 bg-amber-50/60 p-5 dark:border-amber-700/40 dark:bg-amber-900/15"
                     >
                       {/* Passage N — main header */}
-                      {header.heading && (
-                        <h3 className="text-xl font-bold text-amber-900 dark:text-amber-200">
-                          <StyledText text={header.heading} />
-                        </h3>
-                      )}
-                      {/* Short intro text — italics */}
+                      <h3 className="text-xl font-bold text-amber-900 dark:text-amber-200">
+                        <StyledText text={displayTitle} />
+                      </h3>
+
+                      {/* Short intro text — italics (from 1st object description) */}
                       {header.description && (
                         <p className="text-sm italic text-amber-800 dark:text-amber-300">
                           <StyledText text={header.description} />
                         </p>
                       )}
-                      {/* Passage title — subheading, bold-italic */}
-                      {body.heading && (
-                        <h4 className="text-base font-bold italic text-foreground">
-                          <StyledText text={body.heading} />
-                        </h4>
-                      )}
+
                       {/* Passage body — italic */}
                       {body.description && (
-                        <p className="whitespace-pre-line text-base italic leading-relaxed text-foreground sm:text-lg">
+                        <div className="whitespace-pre-line text-base italic leading-relaxed text-foreground sm:text-lg">
                           <StyledText text={body.description} />
-                        </p>
-                      )}
-                      {/* Images and audio for the body, if any */}
-                      {resolveMediaUrl(body.image_path) && (
-                        <div className="my-2">
-                          <Image
-                            src={resolveMediaUrl(body.image_path) ?? ""}
-                            alt={body.heading || "Passage illustration"}
-                            width={800}
-                            height={450}
-                            className="h-auto w-full max-w-full rounded-lg object-contain"
-                            style={{ width: "100%", height: "auto" }}
-                            unoptimized
-                          />
                         </div>
                       )}
-                      {body.audio_path && (
+
+                      {/* Images for the passage */}
+                      {resolveMediaUrl(imagePath) && (
+                        <LessonImageViewer
+                          src={resolveMediaUrl(imagePath) ?? ""}
+                          alt={displayTitle || "Passage illustration"}
+                        />
+                      )}
+
+                      {/* Audio for the passage */}
+                      {audioPath && (
                         <AudioPlayer
-                          src={body.audio_path}
+                          src={audioPath}
                           title="Pronunciation / Audio"
                           className="my-3 border-2"
                         />
@@ -422,22 +451,13 @@ export const LessonConcept = React.memo(function LessonConcept({
                       <StyledDescriptionText text={desc.description} />
                     )}
                     {resolveMediaUrl(desc.image_path) && (
-                      <div className="my-2">
-                        <Image
-                          src={resolveMediaUrl(desc.image_path) ?? ""}
-                          alt={desc.heading || "Concept illustration"}
-                          width={800}
-                          height={450}
-                          className="h-auto w-full max-w-full rounded-lg object-contain"
-                          style={{ width: "100%", height: "auto" }}
-                          unoptimized
-                        />
-                        {hasInlineCaption && (
-                          <p className="my-2.5 text-center text-sm font-semibold italic text-foreground/85 dark:text-slate-200 sm:text-base">
-                            <StyledText text={nextEntry.item.heading ?? ""} />
-                          </p>
-                        )}
-                      </div>
+                      <LessonImageViewer
+                        src={resolveMediaUrl(desc.image_path) ?? ""}
+                        alt={desc.heading || "Concept illustration"}
+                        caption={
+                          hasInlineCaption ? nextEntry.item.heading : undefined
+                        }
+                      />
                     )}
                     {desc.audio_path && (
                       <AudioPlayer

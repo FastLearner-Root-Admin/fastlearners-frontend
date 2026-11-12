@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { AudioPlayer } from "@/components/lessons/AudioPlayer";
+import { LessonImageViewer } from "@/components/lessons/LessonImageViewer";
 import { ExerciseModal } from "@/components/lessons/ExerciseModal";
 import { YouTubeEmbed } from "@/components/lessons/YouTubeEmbed";
 
@@ -199,17 +200,10 @@ export function LessonContent({
                             </p>
                           )}
                           {resolveMediaUrl(desc.image_path) && (
-                            <div className="my-2">
-                              <Image
-                                src={resolveMediaUrl(desc.image_path) ?? ""}
-                                alt={desc.heading || "Concept illustration"}
-                                width={800}
-                                height={450}
-                                className="h-auto w-full max-w-full rounded-lg object-contain"
-                                style={{ width: "100%", height: "auto" }}
-                                unoptimized
-                              />
-                            </div>
+                            <LessonImageViewer
+                              src={resolveMediaUrl(desc.image_path) ?? ""}
+                              alt={desc.heading || "Concept illustration"}
+                            />
                           )}
                           {desc.audio_path && (
                             <AudioPlayer
@@ -273,17 +267,10 @@ export function LessonContent({
                           </p>
                         )}
                         {resolveMediaUrl(example.image_path) && (
-                          <div className="my-2">
-                            <Image
-                              src={resolveMediaUrl(example.image_path) ?? ""}
-                              alt={example.title || "Example illustration"}
-                              width={800}
-                              height={450}
-                              className="h-auto w-full max-w-full rounded-lg object-contain"
-                              style={{ width: "100%", height: "auto" }}
-                              unoptimized
-                            />
-                          </div>
+                          <LessonImageViewer
+                            src={resolveMediaUrl(example.image_path) ?? ""}
+                            alt={example.title || "Example illustration"}
+                          />
                         )}
                         {example.audio_path && (
                           <AudioPlayer

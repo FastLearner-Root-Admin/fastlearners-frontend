@@ -39,8 +39,25 @@ function closeTagFor(openTag: string): string {
   return "tc/"; // tcb, tcd, tcr all close with tc/
 }
 
+/**
+ * Normalizes all line breaks:
+ * - Literal escaped "\\n" and "\\r\\n" from serialized JSON or databases
+ * - Carriage returns "\\r\\n" and "\\r"
+ * - Explicit "/n" markers (per lesson format specifications)
+ */
+export function normalizeLineBreaks(text: string): string {
+  if (!text) return "";
+  return text
+    .replace(/\\r\\n/g, "\n")
+    .replace(/\\n/g, "\n")
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n")
+    .replace(/\/n/g, "\n");
+}
+
 export function parseLessonText(raw: string): TextSegment[] {
   if (!raw) return [];
+  const normalized = normalizeLineBreaks(raw);
   const segments: TextSegment[] = [];
 
   function parse(input: string, inherited: Partial<TextSegment>): void {
@@ -66,7 +83,7 @@ export function parseLessonText(raw: string): TextSegment[] {
     parse(afterOpen.slice(closeIdx + closeTag.length), inherited);
   }
 
-  parse(raw, {});
+  parse(normalized, {});
   return segments;
 }
 
@@ -83,11 +100,12 @@ export function splitFigureCaption(raw: string): {
   body: string;
 } {
   if (!raw) return { caption: null, body: raw };
+  const normalized = normalizeLineBreaks(raw);
   // Match *iFigure <digits>: ... i/ at the very start of the string
   // Use non-greedy match ([\s\S]*?) so the caption can contain the letter 'i' without early termination
-  const m = raw.match(/^\*i(Figure\s+\d+:[\s\S]*?)i\//i);
-  if (!m) return { caption: null, body: raw };
+  const m = normalized.match(/^\*i(Figure\s+\d+:[\s\S]*?)i\//i);
+  if (!m) return { caption: null, body: normalized };
   const caption = m[1].trim();
-  const body = raw.slice(m[0].length);
+  const body = normalized.slice(m[0].length);
   return { caption, body };
 }
