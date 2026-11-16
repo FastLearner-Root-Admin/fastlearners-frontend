@@ -14,6 +14,7 @@ import {
 import { toast } from "sonner";
 
 import { UPLOAD_CONFIGS } from "@/lib/api/lesson-upload";
+import { CSV_COLUMNS } from "@/lib/utils/csv-upload-helper";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -46,63 +47,8 @@ interface FileUploadSectionProps {
   completed?: boolean;
 }
 
-// Required columns for each upload type
-const REQUIRED_COLUMNS = {
-  lessons: [
-    "class",
-    "subject",
-    "term",
-    "week",
-    "topic",
-    "overview",
-    "objectives",
-    "key_concepts",
-    "summary",
-    "application",
-  ],
-  concepts: [
-    "lesson_name",
-    "concept_name",
-    "description",
-    "examples",
-    "exercises",
-  ],
-  examples: ["concept_name", "example_title", "example_content", "explanation"],
-  exercises: [
-    "concept_name",
-    "question",
-    "options",
-    "correct_answer",
-    "explanation",
-  ],
-  general_exercises: [
-    "lesson_name",
-    "question",
-    "options",
-    "correct_answer",
-    "explanation",
-    "difficulty_level",
-  ],
-  check_markers: [
-    "lesson_name",
-    "marker_type",
-    "criteria",
-    "points",
-    "description",
-  ],
-  scheme_of_work: [
-    "class",
-    "subject",
-    "term",
-    "week",
-    "topic",
-    "objectives",
-    "activities",
-    "resources",
-    "assessment",
-    "breakdown",
-  ],
-};
+// Single source of truth — column lists live in csv-upload-helper.ts
+const REQUIRED_COLUMNS = CSV_COLUMNS;
 
 function FileUploadSection({
   config,

@@ -85,7 +85,7 @@ interface BulkPreviewState {
 const BULK_FILE_CONFIGS: {
   id: BulkFileKey;
   label: string;
-  requiredColumns: string[];
+  requiredColumns: readonly string[];
 }[] = [
   {
     id: "lessons_file",

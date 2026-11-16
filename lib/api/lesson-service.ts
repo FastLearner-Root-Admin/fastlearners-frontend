@@ -759,7 +759,7 @@ export const updateCheckMarkersFileWithValidation = async (
 // Generic smart upload function
 const smartUploadWithValidation = async (
   file: File,
-  requiredColumns: string[],
+  requiredColumns: readonly string[],
   uploadFunction: (file: File) => Promise<ApiResponse>,
   fileType: string,
 ): Promise<UploadResult> => {

@@ -179,7 +179,7 @@ export default function FileUpload({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
-  const getExpectedColumns = (): string[] => {
+  const getExpectedColumns = (): readonly string[] => {
     return CSV_COLUMNS[fileType] || [];
   };
 
