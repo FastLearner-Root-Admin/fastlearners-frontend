@@ -7,6 +7,7 @@ import { parseAuthCookiesServer } from "@/lib/server/auth-cookies";
 import {
   isValidUploadFile,
   MAX_UPLOAD_SIZE_BYTES,
+  sanitizeUploadCSV,
 } from "@/lib/server/upload-validation";
 
 export async function POST(req: NextRequest) {
@@ -62,9 +63,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Sanitize file if it contains escaped quotes that break PHP's fgetcsv
+    const uploadFile = await sanitizeUploadCSV(file);
+
     // Create new FormData for upstream
     const upstreamFormData = new FormData();
-    upstreamFormData.append("concepts_file", file);
+    upstreamFormData.append("concepts_file", uploadFile, uploadFile.name);
 
     const upstream = await fetch(
       `${BASE_API_URL}/superadmin/lessons/uploads/concepts`,

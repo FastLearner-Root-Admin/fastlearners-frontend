@@ -521,31 +521,8 @@ export const uploadLessonsFileWithValidation = async (
       };
     }
 
-    // Try uploading with detected format first
-    let uploadResult = await tryUploadLessonsFile(file);
-    let triedFormats = [validation.format];
-
-    if (!uploadResult.success) {
-      if (debugUploads) {
-        console.log(
-          `Upload failed with ${validation.format} format, trying alternative format`,
-        );
-      }
-
-      // Try the alternative format
-      const alternativeFormat =
-        validation.format === "comma" ? "pipe" : "comma";
-      const content = await file.text();
-      const normalizedContent = normalizeCSVContent(content, alternativeFormat);
-      const normalizedFile = createNormalizedFile(
-        file,
-        normalizedContent,
-        alternativeFormat,
-      );
-
-      uploadResult = await tryUploadLessonsFile(normalizedFile);
-      triedFormats.push(alternativeFormat);
-    }
+    // Upload the file directly (respecting original user format)
+    const uploadResult = await tryUploadLessonsFile(file);
 
     return {
       success: uploadResult.success,
@@ -553,7 +530,7 @@ export const uploadLessonsFileWithValidation = async (
       apiResponse: uploadResult.apiResponse,
       error: uploadResult.error,
       parsedError: uploadResult.parsedError,
-      triedFormats,
+      triedFormats: [validation.format],
     };
   } catch (error) {
     if (debugUploads) {

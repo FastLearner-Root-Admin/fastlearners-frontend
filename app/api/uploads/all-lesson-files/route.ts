@@ -7,6 +7,7 @@ import { parseAuthCookiesServer } from "@/lib/server/auth-cookies";
 import {
   isValidUploadFile,
   MAX_UPLOAD_SIZE_BYTES,
+  sanitizeUploadCSV,
 } from "@/lib/server/upload-validation";
 
 export async function POST(req: NextRequest) {
@@ -108,13 +109,13 @@ export async function POST(req: NextRequest) {
 
     // Create new FormData for upstream with all files
     const upstreamFormData = new FormData();
-    requiredFields.forEach((field) => {
-      const file = formData.get(field) as File;
+    for (const field of requiredFields) {
+      const file = formData.get(field) as File | null;
       if (file) {
-        // No field name mapping needed - API accepts the same field names
-        upstreamFormData.append(field, file);
+        const sanitizedFile = await sanitizeUploadCSV(file);
+        upstreamFormData.append(field, sanitizedFile, sanitizedFile.name);
       }
-    });
+    }
 
     const upstream = await fetch(
       `${BASE_API_URL}/superadmin/lessons/uploads/all-lesson-files`,

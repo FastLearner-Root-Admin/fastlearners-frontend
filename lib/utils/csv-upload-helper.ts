@@ -23,8 +23,9 @@ export interface CSVPreviewResult {
   detectedDelimiter: string;
 }
 
-// Required columns for different file types
+// Required columns for different file types (supporting new UUID-enabled structures)
 export const LESSON_REQUIRED_COLUMNS = [
+  "uuid",
   "class",
   "subject",
   "term",
@@ -35,9 +36,12 @@ export const LESSON_REQUIRED_COLUMNS = [
   "key_concepts",
   "summary",
   "application",
+  "order_index",
 ] as const;
 
 export const CONCEPT_REQUIRED_COLUMNS = [
+  "uuid",
+  "lesson_uuid",
   "lesson",
   "title",
   "description",
@@ -45,6 +49,8 @@ export const CONCEPT_REQUIRED_COLUMNS = [
 ] as const;
 
 export const EXAMPLE_REQUIRED_COLUMNS = [
+  "uuid",
+  "concept_uuid",
   "concept",
   "title",
   "problem",
@@ -54,6 +60,8 @@ export const EXAMPLE_REQUIRED_COLUMNS = [
 ] as const;
 
 export const EXERCISE_REQUIRED_COLUMNS = [
+  "uuid",
+  "concept_uuid",
   "concept",
   "title",
   "problem",
@@ -64,6 +72,8 @@ export const EXERCISE_REQUIRED_COLUMNS = [
 ] as const;
 
 export const GENERAL_EXERCISE_REQUIRED_COLUMNS = [
+  "uuid",
+  "lesson_uuid",
   "lesson",
   "problem",
   "solution_steps",
@@ -73,6 +83,8 @@ export const GENERAL_EXERCISE_REQUIRED_COLUMNS = [
 ] as const;
 
 export const CHECK_MARKER_REQUIRED_COLUMNS = [
+  "uuid",
+  "lesson_uuid",
   "lesson",
   "overview",
   "lesson_video",
@@ -106,6 +118,14 @@ export const CSV_COLUMNS = {
 } as const;
 
 export type CSVColumnKey = keyof typeof CSV_COLUMNS;
+
+// Columns that are optional for backward compatibility with older CSV exports
+const OPTIONAL_COLUMNS = new Set([
+  "uuid",
+  "lesson_uuid",
+  "concept_uuid",
+  "order_index",
+]);
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -319,10 +339,14 @@ export async function previewCSVFile(
 export function validateCSVColumns(
   csvResult: CSVValidationResult,
   requiredColumns: readonly string[],
-): CSVValidationResult {  const normalizedHeaders = csvResult.headers.map((h) => h.toLowerCase().trim());
-  const missingColumns = requiredColumns.filter(
-    (col) => !normalizedHeaders.includes(col.toLowerCase().trim()),
-  );
+): CSVValidationResult {
+  const normalizedHeaders = csvResult.headers.map((h) => h.toLowerCase().trim());
+  const missingColumns = requiredColumns.filter((col) => {
+    const colLower = col.toLowerCase().trim();
+    // Allow UUID and order_index to be omitted for backward compatibility with legacy files
+    if (OPTIONAL_COLUMNS.has(colLower)) return false;
+    return !normalizedHeaders.includes(colLower);
+  });
 
   const errors = [...csvResult.errors];
   if (missingColumns.length > 0) {

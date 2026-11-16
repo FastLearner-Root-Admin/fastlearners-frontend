@@ -7,6 +7,7 @@ import { parseAuthCookiesServer } from "@/lib/server/auth-cookies";
 import {
   isValidUploadFile,
   MAX_UPLOAD_SIZE_BYTES,
+  sanitizeUploadCSV,
 } from "@/lib/server/upload-validation";
 
 const UPDATE_UPLOAD_CONFIG: Record<
@@ -126,8 +127,10 @@ export async function POST(
       }),
     );
 
+    const uploadFile = await sanitizeUploadCSV(file);
+
     const upstreamFormData = new FormData();
-    upstreamFormData.append(config.field, file);
+    upstreamFormData.append(config.field, uploadFile, uploadFile.name);
 
     const upstream = await fetch(
       `${BASE_API_URL}/superadmin/lessons/uploads/update/${config.upstreamPath}`,
