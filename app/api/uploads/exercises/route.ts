@@ -7,6 +7,7 @@ import { parseAuthCookiesServer } from "@/lib/server/auth-cookies";
 import {
   isValidUploadFile,
   MAX_UPLOAD_SIZE_BYTES,
+  sanitizeUploadCSV,
 } from "@/lib/server/upload-validation";
 
 export async function POST(req: NextRequest) {
@@ -62,9 +63,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const uploadFile = await sanitizeUploadCSV(file);
+
     // Create new FormData for upstream
     const upstreamFormData = new FormData();
-    upstreamFormData.append("exercises_file", file);
+    upstreamFormData.append("exercises_file", uploadFile, uploadFile.name);
 
     const upstream = await fetch(
       `${BASE_API_URL}/superadmin/lessons/uploads/exercises`,

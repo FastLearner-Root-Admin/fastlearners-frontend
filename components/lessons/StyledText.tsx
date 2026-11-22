@@ -26,6 +26,17 @@ export function StyledText({ text, className }: StyledTextProps) {
   return (
     <span className={cn("whitespace-pre-line", className)}>
       {segments.map((seg, i) => {
+        if (seg.code) {
+          return (
+            <code
+              key={i}
+              className="my-0.5 inline-block rounded bg-slate-900 px-2 py-0.5 font-mono text-xs sm:text-sm font-medium text-slate-50 shadow-sm dark:bg-slate-950 dark:text-slate-100"
+            >
+              {seg.text}
+            </code>
+          );
+        }
+
         const cls = cn(
           seg.bold && seg.italic
             ? "font-bold italic"

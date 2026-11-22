@@ -5,13 +5,14 @@ export interface TextSegment {
   text: string;
   bold?: boolean;
   italic?: boolean;
+  code?: boolean;
   color?: "blue" | "dark-brown" | "red";
 }
 
-// Match earliest open tag: *bi, *tcb, *tcd, *tcr, *b, *i
+// Match earliest open tag: *bi, *tcb, *tcd, *tcr, *cc, *b, *i
 // Longer alternatives MUST come first so "bi" wins over "b".
 // No lookahead — tags may appear directly adjacent to word characters (e.g. *bbillionsbo/).
-const OPEN_TAG_RE = /\*(bi|tcb|tcd|tcr|b|i)/;
+const OPEN_TAG_RE = /\*(bi|tcb|tcd|tcr|cc|b|i)/;
 
 function tagToProps(tag: string): Partial<TextSegment> {
   switch (tag) {
@@ -21,6 +22,8 @@ function tagToProps(tag: string): Partial<TextSegment> {
       return { italic: true };
     case "bi":
       return { bold: true, italic: true };
+    case "cc":
+      return { code: true };
     case "tcb":
       return { color: "blue" };
     case "tcd":
@@ -36,6 +39,7 @@ function closeTagFor(openTag: string): string {
   if (openTag === "b") return "bo/";
   if (openTag === "i") return "i/";
   if (openTag === "bi") return "bi/";
+  if (openTag === "cc") return "cc/";
   return "tc/"; // tcb, tcd, tcr all close with tc/
 }
 
