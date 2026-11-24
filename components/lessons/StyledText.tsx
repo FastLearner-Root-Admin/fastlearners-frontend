@@ -30,7 +30,7 @@ export function StyledText({ text, className }: StyledTextProps) {
           return (
             <code
               key={i}
-              className="my-0.5 inline-block rounded bg-slate-900 px-2 py-0.5 font-mono text-xs sm:text-sm font-medium text-slate-50 shadow-sm dark:bg-slate-950 dark:text-slate-100"
+              className="my-0.5 inline-block rounded bg-slate-900 px-2 py-0.5 font-mono text-xs font-medium text-slate-50 shadow-sm dark:bg-slate-950 dark:text-slate-100 sm:text-sm"
             >
               {seg.text}
             </code>
